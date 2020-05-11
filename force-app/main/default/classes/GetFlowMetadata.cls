@@ -1,4 +1,4 @@
-public with sharing class GetMetadata {
+public with sharing class GetFlowMetadata {
 
  
         @InvocableMethod
@@ -8,10 +8,13 @@ public with sharing class GetMetadata {
             
             for (Requests req : requestList) {
                 String name = req.name;
-                String objectType = req.objectType;
+                //String objectType = req.objectType || 'Flow'; generalizing this requires one output for each apex type, which is messy
+                String version = req.version;
+                if (String.isEmpty(version))
+                    version = '1';
 
                 MetadataService.MetadataPort service = createService();	
-                MetadataService.ListMetadataQuery mdQuery = new MetadataService.ListMetadataQuery();
+                 MetadataService.ListMetadataQuery mdQuery = new MetadataService.ListMetadataQuery();
                 mdQuery.type_x = 'Flow';
                 MetadataService.ListMetadataQuery[] mdqList = new MetadataService.ListMetadataQuery[] {};
                 mdqList.add(mdQuery);
@@ -20,19 +23,20 @@ public with sharing class GetMetadata {
                 System.debug('@@@ metadata result size = ' + fpList.size());
                 for (MetadataService.FileProperties fp: fpList) {
                     System.debug('@@@ Flow name: ' + fp.fullName);
-                }
+                } 
 
-                String[] flowNameArray = new List<String>();
-                //flowNameArray.add(req.name); 
-                flowNameArray.add('Testproc_One-1');
+                String[] flowNameArray = new List<String>();       
+                flowNameArray.add(name + '-' + version);
+
+                System.debug('flownNameArray: ' + flowNameArray);
                 MetadataService.Flow flow =
-                            (MetadataService.Flow) service.readMetadata('Flow',flowNameArray).getRecords()[0];
-                
+                            (MetadataService.Flow) service.readMetadata('Flow',flowNameArray).getRecords()[0];             
+                System.debug('flow is: ' + flow);
                 System.debug('Name ' + flow.FullName);
-                System.debug('recordCreate ' + flow.recordCreates);
+                System.debug('ProcessType ' + flow.processType);
     
     
-                response.XMLText = flow.FullName;
+                response.flowMetadata = flow;
                 responseWrapper.add(response);
             }
             return responseWrapper;
@@ -53,18 +57,19 @@ public with sharing class GetMetadata {
            
             @InvocableVariable 
             public String name;
-    
+
             @InvocableVariable 
-            public String objectType;
+            public String version;
+    
+/*             @InvocableVariable 
+            public String objectType; */
     
         }
     
         public class Results {
-    
-           
+         
             @InvocableVariable
-            public String XMLText;
+            public MetadataService.Flow flowMetadata;
     
         }
     }
-    

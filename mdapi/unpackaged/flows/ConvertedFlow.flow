@@ -22,7 +22,10 @@
                     <booleanValue>true</booleanValue>
                 </rightValue>
             </conditions>
-            <label>Criteria One</label>
+            <connector>
+                <targetReference>myRule_1_A1</targetReference>
+            </connector>
+            <label>Always Execute</label>
         </rules>
     </decisions>
     <formulas>
@@ -30,8 +33,8 @@
         <dataType>Boolean</dataType>
         <expression>true</expression>
     </formulas>
-    <interviewLabel>Testproc_One-1_InterviewLabel</interviewLabel>
-    <label>Testproc One</label>
+    <interviewLabel>TestWorkflow_AccountRecordChanges-1_InterviewLabel</interviewLabel>
+    <label>Converted PB Workflow -</label>
     <processMetadataValues>
         <name>ObjectType</name>
         <value>
@@ -56,7 +59,44 @@
             <stringValue>onAllChanges</stringValue>
         </value>
     </processMetadataValues>
-    <processType>Workflow</processType>
+    <processType>AutoLaunchedFlow</processType>
+    <recordCreates>
+        <name>myRule_1_A1</name>
+        <label>Create Case</label>
+        <locationX>100</locationX>
+        <locationY>200</locationY>
+        <inputAssignments>
+            <processMetadataValues>
+                <name>dataType</name>
+                <value>
+                    <stringValue>Picklist</stringValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>isRequired</name>
+                <value>
+                    <booleanValue>false</booleanValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>leftHandSideLabel</name>
+                <value>
+                    <stringValue>Status</stringValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>rightHandSideType</name>
+                <value>
+                    <stringValue>Picklist</stringValue>
+                </value>
+            </processMetadataValues>
+            <field>Status</field>
+            <value>
+                <stringValue>New</stringValue>
+            </value>
+        </inputAssignments>
+        <object>Case</object>
+    </recordCreates>
     <startElementReference>myDecision</startElementReference>
     <status>Draft</status>
     <variables>
