@@ -3786,35 +3786,66 @@ public class MetadataService {
         private String[] type_att_info = new String[]{'xsi:type'};
         private String[] field_order_type_info = new String[]{'fullName', 'availability','description','displayType','encodingKey','hasMenubar','hasScrollbars','hasToolbar','height','isResizable','linkType','masterLabel','openType','page_x','position','protected_x','requireRowSelection','scontrol','showsLocation','showsStatus','url','width'};
     }
+
     public class Flow extends Metadata {
+        @auraEnabled
         public String type = 'Flow';
+        @auraEnabled
         public String fullName;
         private String[] fullName_type_info = new String[]{'fullName',SOAP_M_URI,null,'0','1','false'};
+        @auraEnabled
         public MetadataService.FlowActionCall[] actionCalls;
+        @auraEnabled
         public MetadataService.FlowApexPluginCall[] apexPluginCalls;
+        @auraEnabled
         public MetadataService.FlowAssignment[] assignments;
+        @auraEnabled
         public MetadataService.FlowChoice[] choices;
+        @auraEnabled
         public MetadataService.FlowConstant[] constants;
+        @auraEnabled
         public MetadataService.FlowDecision[] decisions;
+        @auraEnabled
         public String description;
+        @auraEnabled
         public MetadataService.FlowDynamicChoiceSet[] dynamicChoiceSets;
+        @auraEnabled
         public MetadataService.FlowFormula[] formulas;
+        @auraEnabled
         public String interviewLabel;
+        @auraEnabled
         public String label;
+        @auraEnabled
         public MetadataService.FlowLoop[] loops;
+        @auraEnabled
         public MetadataService.FlowMetadataValue[] processMetadataValues;
+        @auraEnabled
         public String processType;
+        @auraEnabled
         public MetadataService.FlowRecordCreate[] recordCreates;
+        @auraEnabled
         public MetadataService.FlowRecordDelete[] recordDeletes;
+        @auraEnabled
         public MetadataService.FlowRecordLookup[] recordLookups;
+        @auraEnabled
         public MetadataService.FlowRecordUpdate[] recordUpdates;
+        @auraEnabled
         public MetadataService.FlowScreen[] screens;
+        @auraEnabled
         public MetadataService.FlowStage[] stages;
+        @auraEnabled
         public String startElementReference;
+       // @auraEnabled
+       // public MetadataService.FlowStart start;
+        @auraEnabled
         public MetadataService.FlowStep[] steps;
+        @auraEnabled
         public MetadataService.FlowSubflow[] subflows;
+        @auraEnabled
         public MetadataService.FlowTextTemplate[] textTemplates;
+        @auraEnabled
         public MetadataService.FlowVariable[] variables;
+        @auraEnabled
         public MetadataService.FlowWait[] waits;
         private String[] actionCalls_type_info = new String[]{'actionCalls',SOAP_M_URI,null,'0','-1','false'};
         private String[] apexPluginCalls_type_info = new String[]{'apexPluginCalls',SOAP_M_URI,null,'0','-1','false'};
@@ -3837,6 +3868,7 @@ public class MetadataService {
         private String[] screens_type_info = new String[]{'screens',SOAP_M_URI,null,'0','-1','false'};
         private String[] stages_type_info = new String[]{'stages',SOAP_M_URI,null,'0','-1','false'};
         private String[] startElementReference_type_info = new String[]{'startElementReference',SOAP_M_URI,null,'0','1','false'};
+       // private String[] start_type_info = new String[]{'start',SOAP_M_URI,null,'0','-1','false'};
         private String[] steps_type_info = new String[]{'steps',SOAP_M_URI,null,'0','-1','false'};
         private String[] subflows_type_info = new String[]{'subflows',SOAP_M_URI,null,'0','-1','false'};
         private String[] textTemplates_type_info = new String[]{'textTemplates',SOAP_M_URI,null,'0','-1','false'};
@@ -3846,6 +3878,31 @@ public class MetadataService {
         private String[] type_att_info = new String[]{'xsi:type'};
         private String[] field_order_type_info = new String[]{'fullName', 'actionCalls','apexPluginCalls','assignments','choices','constants','decisions','description','dynamicChoiceSets','formulas','interviewLabel','label','loops','processMetadataValues','processType','recordCreates','recordDeletes','recordLookups','recordUpdates','screens','stages','startElementReference','steps','subflows','textTemplates','variables','waits'};
     }
+
+    public class FlowStart extends FlowNode {
+        public String type = 'FlowStart';
+        private String[] type_att_info = new String[]{'xsi:type'};
+        public Integer locationX;
+        public Integer locationY;
+        private String[] locationX_type_info = new String[]{'locationX',SOAP_M_URI,null,'1','1','false'};
+        private String[] locationY_type_info = new String[]{'locationY',SOAP_M_URI,null,'1','1','false'};
+        public MetadataService.FlowConnector connector;
+        private String[] connector_type_info = new String[]{'connector',SOAP_M_URI,null,'0','1','false'};
+        //public String object;
+        //private String[] object_type_info = new String[]{'object',SOAP_M_URI,null,'0','1','false'};
+        public MetadataService.FlowRecordFilter[] filters;
+        private String[] filters_type_info = new String[]{'filters',SOAP_M_URI,null,'0','-1','false'};
+        public MetadataService.FlowSchedule schedule;
+        private String[] schedule_type_info = new String[]{'schedule',SOAP_M_URI,null,'0','1','false'};
+        public String recordTriggerType;
+        private String[] recordTriggerType_type_info = new String[]{'recordTriggerType',SOAP_M_URI,null,'0','1','false'};
+        public String triggerType;
+        private String[] triggerType_type_info = new String[]{'triggerType',SOAP_M_URI,null,'0','1','false'};
+        private String[] apex_schema_type_info = new String[]{SOAP_M_URI,'true','false'};
+        private String[] field_order_type_info = new String[]{'processMetadataValues','description','name','label','locationX','locationY', 'assignmentItems','connector'};
+    }
+    
+    
     public class CustomMetadataValue {
         public String field;
         public String value;
@@ -11213,6 +11270,19 @@ public class MetadataService {
         private String[] apex_schema_type_info = new String[]{SOAP_M_URI,'true','false'};
         private String[] field_order_type_info = new String[]{'isActive','label','stageOrder'};
     }
+
+    public class FlowSchedule {
+        public String frequency;
+        public Date startDate;
+        public Time startTime;
+        private String[] frequency_type_info = new String[]{'frequency',SOAP_M_URI,null,'1','1','false'};
+        private String[] startDate_type_info = new String[]{'startDate',SOAP_M_URI,null,'1','1','false'};
+        private String[] startTime_type_info = new String[]{'startTime',SOAP_M_URI,null,'1','1','false'};
+        private String[] apex_schema_type_info = new String[]{SOAP_M_URI,'true','false'};
+        private String[] field_order_type_info = new String[]{'frequency','startDate','startTime'};
+    }
+
+
     public class ChartSummary {
         public String aggregate;
         public String axisBinding;
@@ -13429,6 +13499,8 @@ public class MetadataService {
             MetadataService.createMetadataResponse_element response_x;
             Map<String, MetadataService.createMetadataResponse_element> response_map_x = new Map<String, MetadataService.createMetadataResponse_element>();
             response_map_x.put('response_x', response_x);
+            System.debug('response_map_x in createMetadata is: ' +response_map_x );
+            System.debug('request_x in createMetadata is: ' +request_x );
             WebServiceCallout.invoke(
               this,
               request_x,
