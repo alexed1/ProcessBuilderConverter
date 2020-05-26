@@ -101,7 +101,7 @@
             <inputParameters>
                 <name>metadataName</name>
                 <value>
-                    <elementReference>targetFlowName</elementReference>
+                    <elementReference>selectFlow.selectedFlowApiName</elementReference>
                 </value>
             </inputParameters>
             <inputParameters>
