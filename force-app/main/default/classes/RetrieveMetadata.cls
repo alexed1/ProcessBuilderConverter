@@ -121,7 +121,7 @@ RetrieveResult retrieveResult = metadataConnection.checkRetrieveStatus(response.
 			// Errors?
 			if(retrieveResult.status != 'Succeeded')
 			{
-			    AsyncResult = null;				
+			    return JSON.serialize(retrieveResult);			
 			}
 			else
 			{

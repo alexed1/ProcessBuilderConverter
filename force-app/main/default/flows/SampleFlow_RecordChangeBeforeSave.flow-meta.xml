@@ -3,13 +3,20 @@
     <assignments>
         <name>Assign_Street</name>
         <label>Assign Street</label>
-        <locationX>203</locationX>
-        <locationY>274</locationY>
+        <locationX>176</locationX>
+        <locationY>290</locationY>
         <assignmentItems>
             <assignToReference>$Record.BillingStreet</assignToReference>
             <operator>Assign</operator>
             <value>
                 <stringValue>45 Jones St</stringValue>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>curStringVar1</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Record.OwnerId</elementReference>
             </value>
         </assignmentItems>
     </assignments>
@@ -39,4 +46,11 @@
         <triggerType>RecordBeforeSave</triggerType>
     </start>
     <status>Draft</status>
+    <variables>
+        <name>curStringVar1</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
 </Flow>

@@ -12,67 +12,74 @@ public with sharing class ConvertFlowMetadata {
             System.debug('zip file text is:' + req.flowMetadataZipFile);
             System.debug('flowname is:' + req.flowName);
 
-             
-            Blob zipBlob = EncodingUtil.base64Decode(req.flowMetadataZipFile);
-            Zippex curZippex = new Zippex(zipBlob);
-            Set<String> fileNames = curZippex.getFileNames();
-            System.debug('filenames are: ' + fileNames);
-         
-            List<String> filenamesList = new List<String>(fileNames);
-
-
-
+            String flowmetadata = unpackZipfile( req.flowMetadataZipFile);
+            System.debug('unpackaged flowmetadata is: ' + flowmetadata);
+            String validtyProblemString = ValidateMetadata.validate (flowmetadata);
+            System.debug('validtyProblemString is: ' + validtyProblemString);
+            if(validtyProblemString == '') {
+                String metadataText = convertMetadata(flowmetadata, req.flowName);
+                response.convertedFlowMetadata = metadataText;
+            } else {
+                response.errors = validtyProblemString;
+            }
             
-               //currently only set up to handle a single file
-            Blob fileData = curZippex.getFile(filenamesList[0]);
-            System.debug ('filename: ' + filenamesList[0]);
-            String flowmetadata = fileData.toString();
-            //System.debug ('file: '+  flowmetadata);
-            response.convertedFlowMetadata = flowmetadata;
-            String metadataText = convertToXML(flowmetadata, req.flowName);
-            response.convertedFlowMetadata = metadataText;
             responseWrapper.add(response);
         }
         return responseWrapper;
-        
-
-
     }
 
-    public static String convertToXML(String metadata, String flowName) {
+    public static String unpackZipfile(String metadataZipfile) {
+
+             
+        Blob zipBlob = EncodingUtil.base64Decode(metadataZipfile);
+        Zippex curZippex = new Zippex(zipBlob);
+        Set<String> fileNames = curZippex.getFileNames();
+        System.debug('filenames are: ' + fileNames);
+     
+        List<String> filenamesList = new List<String>(fileNames);
+
+           //currently only set up to handle a single file
+        Blob fileData = curZippex.getFile(filenamesList[0]);
+        System.debug ('filename: ' + filenamesList[0]);
+        return  fileData.toString();
+    }
+
+    public static String convertMetadata(String metadata, String flowName) {
         Dom.Document doc = new Dom.Document();
         doc.load(metadata);
-        //Retrieve the root element for this document.
-
         Dom.XMLNode flowXML = doc.getRootElement();
-        System.debug('root node is:' + flowXML);
-        System.debug('CHILDREN........');
-
-        
-       /*  String contextObjectType = getProcessMetadataValue(flowXML,'ObjectType');
+       // System.debug('root node is:' + flowXML);
+       
+        String contextObjectType = getProcessMetadataValue(flowXML,'ObjectType');
         System.debug('contextObjectType for flow: ' + flowName +' is: ' + contextObjectType);
         String triggerType = getProcessMetadataValue(flowXML,'TriggerType');
-        System.debug('triggerType for flow: ' + flowName +' is: ' + triggerType); */
-
+        System.debug('triggerType for flow: ' + flowName +' is: ' + triggerType); 
+        String startElementReference = flowXML.getChildElement('startElementReference', SOAP_NS).getText();
         String newProcessType = 'AutolaunchedFlow';
+        
         flowXML = ModifyFlowMetadata.changeProcessType(flowXML, newProcessType);
-        //flowXML = ModifyFlowMetadata.addStartElement(flowXML);
-                  
+        flowXML = ModifyFlowMetadata.setStatus(flowXML, 'Draft' );
+        flowXML = ModifyFlowMetadata.addStartElement(flowXML, contextObjectType, triggerType, startElementReference);
+        doc = ModifyFlowMetadata.changeContextReference(doc);
+        doc = ModifyFlowMetadata.fixupRelatedReferences(doc);
+        System.debug ('doc is: ' + doc);     
         String classText = doc.toXmlString();
-        deployChangedMetadata(classText, flowName, null, 'Flow');         
+        //deployChangedMetadata(classText, flowName, null, 'Flow');         
         return classText;
             
     }
 
+   
+
     public static String getProcessMetadataValue(Dom.XmlNode flowXML, String pmvTargetName) {
         for(Dom.XMLNode pmv : flowXML.getChildElements()) {
-            System.debug('current child element of flow is: ' + pmv);
+           // System.debug('current child element of flow is: ' + pmv);
             if (pmv.getName() == 'processMetadataValues') {
-                System.debug ('this one has the name processMetadataValue'); 
+                //System.debug ('this one has the name processMetadataValue'); 
                 for (Dom.XMLNode pmvChild : pmv.getChildElements()){
-                    System.debug('the current child of the processmetadatavalue element is ' + pmvChild);
+                    //System.debug('the current child of the processmetadatavalue element is ' + pmvChild);
                     if (pmvChild.getName() == 'name') {
-                        System.debug ('this child is named name');
+                       // System.debug ('this child is named name');
                         if (pmvChild.getText() == pmvTargetName) {
                             System.debug ('theres a match between the value of this element and the passed in value: ' + pmvTargetName);
                             String targetValue;
@@ -118,6 +125,9 @@ public with sharing class ConvertFlowMetadata {
     }
 
     public class Results {
+
+        @InvocableVariable
+        public String errors;
 
        
         @InvocableVariable

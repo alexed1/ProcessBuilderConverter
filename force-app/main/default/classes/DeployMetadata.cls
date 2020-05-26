@@ -1,22 +1,22 @@
 public with sharing class DeployMetadata {
  
     @AuraEnabled 
-    public static String deploy(String metadataText, String objectName, String testLevel, String objectType) {
+    public static String deploy(String metadataText, String metadataName, String testLevel, String objectType) {
         System.debug('entering deploy. metadata text, objectname, testlevel, and object type are:' );
-        System.debug ('metadataText: ' + metadataText);
-        System.debug ('objectName: ' + objectName);
+       // System.debug ('metadataText: ' + metadataText);
+        System.debug ('objectName: ' + metadataName);
         System.debug ('testLevel: ' + testLevel);
         System.debug ('objectType: ' + objectType);
         MetadataService.MetadataPort service = createService();
         if (String.isEmpty(testLevel))
             testLevel = 'NoTestRun';
 
-        String zippedClass = generateZipfile(metadataText, objectName, objectType);
+        String zippedClass = generateZipfile(metadataText, metadataName, objectType);
         MetadataService.AsyncResult deployResult= service.deploy(zippedClass, getDeployOptions());
 
         String jobId = deployResult.id;
         MetadataService.DeployResult result = service.checkDeployStatus(jobId,true);
-        System.debug('deploy status is: ' + objectName + ' ' + result.status + ' ' + result.stateDetail); 
+        System.debug('deploy status is: ' + metadataName + ' ' + result.status + ' ' + result.stateDetail); 
         return jobId;
     }
 
@@ -33,7 +33,7 @@ public with sharing class DeployMetadata {
 			{   
                 System.debug ('status is: ' + deployResult.status);
                 System.debug ('error is: ' + deployResult.errorMessage);
-                String problems;
+                String problems = '';
                 System.debug('deploy result:' + deployResult.details.componentFailures);
                 System.debug('deploy success:' + deployResult.details.componentSuccesses);
                 for(MetadataService.DeployMessage curMessage : deployResult.details.componentFailures) {

@@ -21,10 +21,10 @@ export default class TransferMetadata extends LightningElement {
     @api transferMode;
     @api metadataString;
     @api objectType;
-    
+    modifiedName;
 
-    @wire(getFileNames ,{ zipfile : '$zipFileString'})
-    retrievedFileNames;
+    //@wire(getFileNames ,{ zipfile : '$zipFileString'})
+    //retrievedFileNames;
 
 /*     @api get retrievedFileNames() {
         return JSON.stringify(retrieveFileNamesObject);
@@ -73,8 +73,9 @@ export default class TransferMetadata extends LightningElement {
         console.log('this.metadataName is: ' + this.metadataName);
         console.log('this.metadataString is: ' + this.metadataString);
         console.log('this.objectTpe is: ' + this.objectType);
-
-        deployMetadata({ metadataText : this.metadataString, objectName : this.metadataName, testLevel: null, objectType : this.objectType,  })
+        this.modifiedName = this.metadataName + '_Converted';
+        console.log('this.modifiedName is: ' + this.modifiedName);
+        deployMetadata({ metadataText : this.metadataString, metadataName : this.modifiedName, testLevel: null, objectType : this.objectType,  })
         .then(result => {
             console.log('result of deployment request is: ' + result);
             console.log('successfully sent async deployment request');
@@ -85,7 +86,8 @@ export default class TransferMetadata extends LightningElement {
             if (!this.transferComplete) {
                 console.log('deployment not complete');
                 this.waitForDeployment(this.jobId);
-            }
+            } else
+            this.activity = 'Deployment Complete!';
         })
         .catch(error => {
             this.error = error;
@@ -105,12 +107,13 @@ export default class TransferMetadata extends LightningElement {
         setTimeout(function(){ 
             console.log('checking status. jobId is: ' + this.jobId);
             this.activity = 'Checking status...'
-            this.checkDeploymentStatus();
+            self = this;
+            this.checkDeploymentStatus(self);
         }.bind(this), 1000); 
         this.activity = 'Waiting...'
     }
 
-    checkDeploymentStatus() {
+    checkDeploymentStatus(self) {
         console.log('starting to check deploy status');
         checkDeployStatus({ jobId : this.jobId })
         .then(result => {
@@ -118,15 +121,16 @@ export default class TransferMetadata extends LightningElement {
             if (result == 'success'){
                 console.log('deployment successful');
              
-                this.activity = 'metadata deployed successfully. '
+                self.activity = 'Flow converted successfully. '
                 console.log('this.activity is: ' + this.activity);
 
             } else {
-                console.log('not done yet. jobid is: ' + this.jobId);
-                console.log('result: ' + result);
+                //console.log('not done yet. jobid is: ' + this.jobId);
+                 
 
                 console.log ('deployment failed');
                 console.log ( result);
+                self.activity = result;
 
                /*  if (result != 'Failed'){
                     console.log('resetting timer....');
