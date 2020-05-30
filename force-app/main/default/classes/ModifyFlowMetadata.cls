@@ -28,33 +28,113 @@ public with sharing class ModifyFlowMetadata {
         curNode.getParent().removeChild(curNode);
     }
 
+   /*  Given a set of nodes like this:
+    <processMetadataValues>
+        <name>OldObjectVariable</name>
+        <value>
+            <elementReference>myVariable_old</elementReference>
+        </value>
+    </processMetadataValues> 
+    you would delete this node by passing in targetNodeElementName of processMetadataValues and targetNodeNameValue of OldObjectVariable
+    the node must have a name element */
+    public static void deleteNode(List<Dom.XmlNode> curNodes, String targetNodeElementName, String targetNodeNameValue ) {
+        List<Dom.XmlNode> candidateNodes = new List<Dom.XmlNode>();
+        for ( Dom.XmlNode curNode : curNodes) {
+            if(curNode.getName() == targetNodeElementName){
+                candidateNodes.add(curNode);
+            }
+        }
+        for (Dom.XmlNode curNode : candidateNodes) {
+            if (curNode.getChildElement('name', SOAP_NS).getText() == targetNodeNameValue)
+                deleteSelf(curNode);
+        }
+
+
+    }
+
+    public static List<Dom.XmlNode> getChildrenByName(Dom.XmlNode flowXML, String targetName) {
+        List<Dom.XmlNode> matchingNodes = new List<Dom.XmlNode>();
+        List<Dom.XmlNode> allNodes = flowXML.getChildren();
+        for (Dom.XmlNode curNode : allNodes) {
+            if (curNode.getName() == targetName)
+                matchingNodes.add(curNode);
+        }
+        return matchingNodes;
+    } 
+   
+    public static void removeExcessPMV(Dom.XmlNode flowXML, String pmvName) {
+        deleteNode(flowXML.getChildren(), 'processMetadataValues', pmvName);
+    
+    }
+
+    public static void repositionElements(Dom.Document doc) {
+        //get Decision elements that have order values into a group
+
+        //get first decision element and verify that it has index 0
+      
+        Dom.XmlNode flowXml = doc.getRootElement();
+        List<Dom.XmlNode> curDecisionNodes =  getChildrenByName(flowXML,'decisions');
+        //System.debug('curDecisionNodes is: ' + curDecisionNodes);
+        String curIndexVal = '0.0';
+        //it appears to be safe to assume that the first decision node returned is always the first node in pb. we can verify by looking for index
+        Dom.XmlNode curDecisionNode = curDecisionNodes[0];
+        //verify index  
+        Dom.XmlNode indexNode = XmlUtils.getChildProcessMetadataValueByName(curDecisionNode, 'index');
+        String retrievedIndexVal = XmlUtils.getProcessMetadataValue(indexNode);
+        System.debug ('indexNode is ' + retrievedIndexVal);
+        System.debug ('targetindexval is ' + curIndexVal);
+        if (retrievedIndexVal != curIndexVal)
+            throw new PBConvertException('expected a different index value of the current decision node:' + curDecisionNode);
+         // set its Y Pos to 300 + order*100
+        System.debug('beforexypos, state is: ' + doc.toXmlString());
+        setXYPosition(curDecisionNode, '43', '300');
+        System.debug('afterxypos, state is: ' + doc.toXmlString());
+        // go from there to the target. if none then break
+        // else loop
+
+
+
+
+        //get the target reference. confirm that it's a decision element
+        //reposition its coords
+        //reposition the coords of its child actions
+        //find the next target reference of the cur element. if none, break
+        //loop around
+
+    }
+
+    public static void setXYPosition(Dom.XmlNode curNode, String newXVal, String newYVal) {
+        //System.debug('changing the position of this node: ' + curNode);
+        Dom.XmlNode curXPos = curNode.getChildElement('locationX', SOAP_NS);
+        Dom.XmlNode curYPos = curNode.getChildElement('locationY', SOAP_NS);
+        if (curXPos == null || curYPos == null)
+            throw new PBConvertException('tried to set the x or y position on an xml node that does not support position values');
+        deleteSelf(curXPos);
+        curNode.addChildElement('locationX', SOAP_NS, null).addTextNode(newXVal);
+        deleteSelf(curYPos);
+        curNode.addChildElement('locationY', SOAP_NS, null).addTextNode(newYVal);
+
+    }
+
+   
+
     //delete the variable myVariable_current
     //change all existing myVariable_current references to $Record
     public static Dom.Document changeContextReference(Dom.Document doc) {
         
-    
         Dom.XMLNode flowXML = doc.getRootElement();
 
         List<Dom.XmlNode> allNodes = flowXML.getChildren();
-        List<Dom.XmlNode> variableNodes = new List<Dom.XmlNode>();
-        for ( Dom.XmlNode curNode : allNodes) {
-            if(curNode.getName() == 'variables'){
-                variableNodes.add(curNode);
-            }
-        }
-        for (Dom.XmlNode curNode : variableNodes) {
-            if (curNode.getChildElement('name', SOAP_NS).getText() == 'myVariable_current')
-                deleteSelf(curNode);
-        }
+        deleteNode(allNodes, 'variables', 'myVariable_current');
         
         //find and replace
-        String metadataString = doc.toXmlString();
+         String metadataString = doc.toXmlString();
         metadataString = metadataString.replace('myVariable_current', '$Record');
-        System.debug('metadatastring is: ' + metadataString);
+        //System.debug('metadatastring is: ' + metadataString);
         Dom.Document convertedDoc = new Dom.Document();
-        convertedDoc.load(metadataString);
-        return convertedDoc;
-        
+        convertedDoc.load(metadataString);   
+        return convertedDoc; 
+
     }
 
     public static Dom.Document fixupRelatedReferences(Dom.Document doc) {
@@ -63,7 +143,7 @@ public with sharing class ModifyFlowMetadata {
         String metadataString = doc.toXmlString();
         metadataString = metadataString.replace('Owner.Id', 'OwnerId');
         metadataString = metadataString.replace('User.Id', 'UserId');
-        //System.debug('metadatastring is: ' + metadataString);
+        System.debug('metadatastring is: ' + metadataString);
         Dom.Document convertedDoc = new Dom.Document();
         convertedDoc.load(metadataString);
         return convertedDoc;
@@ -93,4 +173,7 @@ public with sharing class ModifyFlowMetadata {
         return flowXML;
     }
 
+    public class PBConvertException extends Exception{}
+
 }
+

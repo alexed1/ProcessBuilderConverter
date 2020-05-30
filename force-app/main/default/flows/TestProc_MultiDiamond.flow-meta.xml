@@ -125,7 +125,7 @@
                 <leftValueReference>myVariable_current.BillingCity</leftValueReference>
                 <operator>EqualTo</operator>
                 <rightValue>
-                    <stringValue>foo</stringValue>
+                    <stringValue>firstdecbillingvalue</stringValue>
                 </rightValue>
             </conditions>
             <label>FirstDecision</label>
@@ -177,7 +177,7 @@
                 <leftValueReference>myVariable_current.BillingStreet</leftValueReference>
                 <operator>EqualTo</operator>
                 <rightValue>
-                    <stringValue>bar</stringValue>
+                    <stringValue>schmatta</stringValue>
                 </rightValue>
             </conditions>
             <conditions>
@@ -208,7 +208,7 @@
                 <leftValueReference>myVariable_current.Industry</leftValueReference>
                 <operator>EqualTo</operator>
                 <rightValue>
-                    <elementReference>formula_4_myRule_3_7052236532</elementReference>
+                    <elementReference>formula_4_myRule_3_0352271090</elementReference>
                 </rightValue>
             </conditions>
             <connector>
@@ -252,7 +252,7 @@
                 <stringValue>&quot;formulatext&quot;</stringValue>
             </value>
         </processMetadataValues>
-        <name>formula_4_myRule_3_7052236532</name>
+        <name>formula_4_myRule_3_0352271090</name>
         <dataType>String</dataType>
         <expression>&quot;formulatext&quot;</expression>
     </formulas>

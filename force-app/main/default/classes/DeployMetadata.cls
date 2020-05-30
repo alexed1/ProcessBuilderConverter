@@ -25,7 +25,8 @@ public with sharing class DeployMetadata {
         System.debug('entering checkAsyncRequest, job id: ' + jobId);
 		// Check the status of the retrieve request
 		MetadataService.MetadataPort service = createService();
-		MetadataService.DeployResult deployResult = service.checkDeployStatus(jobId, true);
+        MetadataService.DeployResult deployResult = service.checkDeployStatus(jobId, true);
+        System.debug('returned from checkDeployStatus call to metadata service. deploy result is: ' + deployResult);
 		if(deployResult.done)
 		{
 			// Errors?

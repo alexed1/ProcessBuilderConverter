@@ -50,9 +50,12 @@ public with sharing class ConvertFlowMetadata {
         Dom.XMLNode flowXML = doc.getRootElement();
        // System.debug('root node is:' + flowXML);
        
-        String contextObjectType = getProcessMetadataValue(flowXML,'ObjectType');
+        Dom.XmlNode pmv_ObjectType = XmlUtils.getChildProcessMetadataValueByName(flowXML,'ObjectType');
+        String contextObjectType = XmlUtils.getProcessMetadataValue(pmv_ObjectType);
         System.debug('contextObjectType for flow: ' + flowName +' is: ' + contextObjectType);
-        String triggerType = getProcessMetadataValue(flowXML,'TriggerType');
+
+        Dom.XmlNode  pmv_TriggerType = XmlUtils.getChildProcessMetadataValueByName(flowXML,'TriggerType');
+        String triggerType = XmlUtils.getProcessMetadataValue(pmv_TriggerType);
         System.debug('triggerType for flow: ' + flowName +' is: ' + triggerType); 
         String startElementReference = flowXML.getChildElement('startElementReference', SOAP_NS).getText();
         String newProcessType = 'AutolaunchedFlow';
@@ -60,45 +63,21 @@ public with sharing class ConvertFlowMetadata {
         flowXML = ModifyFlowMetadata.changeProcessType(flowXML, newProcessType);
         flowXML = ModifyFlowMetadata.setStatus(flowXML, 'Draft' );
         flowXML = ModifyFlowMetadata.addStartElement(flowXML, contextObjectType, triggerType, startElementReference);
-        doc = ModifyFlowMetadata.changeContextReference(doc);
+        ModifyFlowMetadata.removeExcessPMV(flowXML, 'ObjectType');
+        ModifyFlowMetadata.removeExcessPMV(flowXML, 'ObjectVariable');
+        ModifyFlowMetadata.removeExcessPMV(flowXML, 'OldObjectVariable');
+        ModifyFlowMetadata.removeExcessPMV(flowXML, 'RecursiveCountVariable');
+        ModifyFlowMetadata.removeExcessPMV(flowXML, 'TriggerType');
+        doc = ModifyFlowMetadata.changeContextReference(doc);  
         doc = ModifyFlowMetadata.fixupRelatedReferences(doc);
+        ModifyFlowMetadata.repositionElements(doc);
         System.debug ('doc is: ' + doc);     
         String classText = doc.toXmlString();
         //deployChangedMetadata(classText, flowName, null, 'Flow');         
         return classText;
             
     }
-
-   
-
-    public static String getProcessMetadataValue(Dom.XmlNode flowXML, String pmvTargetName) {
-        for(Dom.XMLNode pmv : flowXML.getChildElements()) {
-           // System.debug('current child element of flow is: ' + pmv);
-            if (pmv.getName() == 'processMetadataValues') {
-                //System.debug ('this one has the name processMetadataValue'); 
-                for (Dom.XMLNode pmvChild : pmv.getChildElements()){
-                    //System.debug('the current child of the processmetadatavalue element is ' + pmvChild);
-                    if (pmvChild.getName() == 'name') {
-                       // System.debug ('this child is named name');
-                        if (pmvChild.getText() == pmvTargetName) {
-                            System.debug ('theres a match between the value of this element and the passed in value: ' + pmvTargetName);
-                            String targetValue;
-                            Dom.XmlNode pmvValueElement = pmv.getChildElement('value', SOAP_NS);
-                            if (pmvValueElement.getChildElement('elementReference', SOAP_NS) != null) {
-                                targetValue = pmvValueElement.getChildElement('elementReference', SOAP_NS).getText();
-                            } else {
-                                targetValue = pmvValueElement.getChildElement('stringValue', SOAP_NS).getText();
-                            }
-                            System.debug('targetValue is: ' + targetValue);
-                            return targetValue;
-                        }
-                    }
-                }
-            }
-            
-        }
-        return 'not found in processMetadataValue';
-    }
+ 
 
     public static void deployChangedMetadata(String classText, String className, String testLevel, String objectType) {
 
@@ -134,4 +113,6 @@ public with sharing class ConvertFlowMetadata {
         public String convertedFlowMetadata;
 
     }
+
+    public class PBConvertException extends Exception{}
 }
