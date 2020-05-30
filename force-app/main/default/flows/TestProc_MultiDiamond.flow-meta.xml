@@ -20,7 +20,7 @@
         <actionName>chatterPost</actionName>
         <actionType>chatterPost</actionType>
         <connector>
-            <targetReference>myDecision5</targetReference>
+            <targetReference>myRule_3_A2</targetReference>
         </connector>
         <inputParameters>
             <name>text</name>
@@ -38,6 +38,38 @@
             <name>subjectNameOrId</name>
             <value>
                 <elementReference>myVariable_current.Owner.Id</elementReference>
+            </value>
+        </inputParameters>
+    </actionCalls>
+    <actionCalls>
+        <processMetadataValues>
+            <name>textJson</name>
+            <value>
+                <stringValue>{&quot;mentions&quot;:[],&quot;message&quot;:&quot;sdfdsf&quot;}</stringValue>
+            </value>
+        </processMetadataValues>
+        <name>myRule_3_A2</name>
+        <label>Post5</label>
+        <locationX>300</locationX>
+        <locationY>300</locationY>
+        <actionName>chatterPost</actionName>
+        <actionType>chatterPost</actionType>
+        <connector>
+            <targetReference>myDecision5</targetReference>
+        </connector>
+        <inputParameters>
+            <name>text</name>
+            <value>
+                <stringValue>sdfdsf</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>type</name>
+        </inputParameters>
+        <inputParameters>
+            <name>subjectNameOrId</name>
+            <value>
+                <elementReference>myVariable_current.Id</elementReference>
             </value>
         </inputParameters>
     </actionCalls>
@@ -208,7 +240,7 @@
                 <leftValueReference>myVariable_current.Industry</leftValueReference>
                 <operator>EqualTo</operator>
                 <rightValue>
-                    <elementReference>formula_4_myRule_3_0352271090</elementReference>
+                    <elementReference>formula_4_myRule_3_8551800904</elementReference>
                 </rightValue>
             </conditions>
             <connector>
@@ -252,7 +284,7 @@
                 <stringValue>&quot;formulatext&quot;</stringValue>
             </value>
         </processMetadataValues>
-        <name>formula_4_myRule_3_0352271090</name>
+        <name>formula_4_myRule_3_8551800904</name>
         <dataType>String</dataType>
         <expression>&quot;formulatext&quot;</expression>
     </formulas>

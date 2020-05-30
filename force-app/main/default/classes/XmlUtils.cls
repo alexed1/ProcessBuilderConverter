@@ -27,10 +27,15 @@ public with sharing class XmlUtils {
         } else if (pmvValueElement.getChildElement('numberValue', SOAP_NS) != null){
             targetValue = pmvValueElement.getChildElement('numberValue', SOAP_NS).getText();
         } else throw new PBConvertException('tried to get a value from a node but could get the right type');
-        
+
         System.debug('targetValue is: ' + targetValue);
         return targetValue;
 
+    }
+
+    public static Dom.XmlNode getChildNodeByName(Dom.XmlNode flowXml, String target) {
+        //TODO 
+        return flowXML;
     }
 
     public static Dom.XmlNode getChildProcessMetadataValueByName(Dom.XmlNode flowXML, String pmvTargetName) {

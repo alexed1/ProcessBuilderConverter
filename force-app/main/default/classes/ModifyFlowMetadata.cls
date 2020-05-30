@@ -86,20 +86,60 @@ public with sharing class ModifyFlowMetadata {
         if (retrievedIndexVal != curIndexVal)
             throw new PBConvertException('expected a different index value of the current decision node:' + curDecisionNode);
          // set its Y Pos to 300 + order*100
-        System.debug('beforexypos, state is: ' + doc.toXmlString());
+        //System.debug('beforexypos, state is: ' + doc.toXmlString());
         setXYPosition(curDecisionNode, '43', '300');
-        System.debug('afterxypos, state is: ' + doc.toXmlString());
-        // go from there to the target. if none then break
-        // else loop
+       // System.debug('afterxypos, state is: ' + doc.toXmlString());
+        Boolean finished = false;
+        Integer yPosition = 300;
+        while(finished != true) {
+            repositionActions(doc, curDecisionNode, String.valueOf(yPosition));
+            yPosition = yPosition + 200;
+            Dom.XmlNode defaultConnectorElement = curDecisionNode.getChildElement('defaultConnector', SOAP_NS);
+            if (defaultConnectorElement != null ) {
+                String nextDefaultNodeName = defaultConnectorElement.getChildElement('targetReference', SOAP_NS).getText();
+                if (nextDefaultNodeName != null) {
+                    for (Dom.XmlNode nextDecisionCandidate : curDecisionNodes ) {
+                        if (nextDecisionCandidate.getChildElement('name', SOAP_NS).getText() == nextDefaultNodeName) {
+                            setXYPosition(nextDecisionCandidate, '43', String.valueOf(yPosition) );
+                            System.debug ('setting position of: ' + nextDefaultNodeName + 'to a Y position of: ' + yPosition);
+                            curDecisionNode = nextDecisionCandidate;
+                        }
+                    }
+                } else throw new PBConvertException('something went wrong. found a default connector in a decision element but didnt find a name value inside');
+                
+            } else {
+                finished = true;
+            }
+            
+            
+        }
 
+    }
 
+    //finds the targetReference value
+    public static String findNextNodeName(Dom.XmlNode curNode) {
+        Dom.XmlNode defaultConnectorElement = curNode.getChildElement('connector', SOAP_NS);
+        if (defaultConnectorElement != null ) {
+            String nextDefaultNodeName = defaultConnectorElement.getChildElement('targetReference', SOAP_NS).getText();
+            if (nextDefaultNodeName != null) {
+                return nextDefaultNodeName;
+            }
 
+        }
+        return null;
+    }
 
-        //get the target reference. confirm that it's a decision element
-        //reposition its coords
-        //reposition the coords of its child actions
-        //find the next target reference of the cur element. if none, break
-        //loop around
+    public static void repositionActions(Dom.Document doc, Dom.XmlNode coreDecisionNode, String currentYPos) {
+        Dom.XmlNode flowXml = doc.getRootElement();
+        Integer xPosition = 200;
+        String nextNodeName= findNextNodeName(coreDecisionNode);
+        while (nextNodeName != null) {
+            Dom.XmlNode curNode = XmlUtils.getChildNodeByName(flowXML, nextNodeName);//find child of flowxml that has a child name element equal to this  generalize getChildProcessMetadataValueByName
+            
+            setXYPosition(curNode,String.valueOf(xPosition), currentYPos);
+            xPosition = xPosition + 150;
+            //look in the node for another connector. if you find one, set nextNodeName equal to the new value, else set nextNodeName to null
+        } 
 
     }
 

@@ -90,6 +90,7 @@ export default class TransferMetadata extends LightningElement {
             this.activity = 'Deployment Complete!';
         })
         .catch(error => {
+            console.log('error calling deployMetadata from transfer');
             this.error = error;
         });
     }
@@ -124,7 +125,11 @@ export default class TransferMetadata extends LightningElement {
                 self.activity = 'Flow converted successfully. '
                 console.log('this.activity is: ' + this.activity);
 
-            } else {
+            } else if (result == 'inprocess') {
+                console.log('deployment not complete');
+                this.waitForDeployment(this.jobId);
+                
+              } else  {
                 //console.log('not done yet. jobid is: ' + this.jobId);
                  
 
@@ -132,22 +137,10 @@ export default class TransferMetadata extends LightningElement {
                 console.log ( result);
                 self.activity = result;
 
-               /*  if (result != 'Failed'){
-                    console.log('resetting timer....');
-                    this.waitForDeployment(this.jobId);
-                } else {
-                    console.log ('deployment failed');
-                    console.log ( result);
-                } */
                   
             }
-        })
-/*         .catch(error => {
-            console.log('error checking async request. error is: ' + JSON.stringify(error));
-            this.error = error;
-        }) */
-        
-        ;
+        });
+ 
     }
 
     checkRetrievalStatus() {

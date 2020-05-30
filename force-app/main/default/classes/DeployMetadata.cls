@@ -50,11 +50,7 @@ public with sharing class DeployMetadata {
                 return 'success';
 			}
 		}
-		else
-		{
-					}	
-
-		return null;
+		else return 'inprocess';
 	}
         
 
