@@ -116,35 +116,58 @@ public with sharing class ModifyFlowMetadata {
 
     }
 
-    //finds the targetReference value
-    public static String findNextNodeName(Dom.XmlNode curNode) {
-        Dom.XmlNode defaultConnectorElement = curNode.getChildElement('connector', SOAP_NS);
-        if (defaultConnectorElement != null ) {
-            String nextDefaultNodeName = defaultConnectorElement.getChildElement('targetReference', SOAP_NS).getText();
-            if (nextDefaultNodeName != null) {
-                return nextDefaultNodeName;
+    public static String getTargetReference(Dom.XmlNode curNode) {
+        Dom.XmlNode nodeConnectorElement = curNode.getChildElement('connector', SOAP_NS);
+        if (nodeConnectorElement != null ) {
+            String nodeConnectorTargetReferenceElementText = nodeConnectorElement.getChildElement('targetReference', SOAP_NS).getText();
+            if (nodeConnectorTargetReferenceElementText != null) {
+                return nodeConnectorTargetReferenceElementText;
             }
 
         }
+        System.debug('failed to find next node name for this node: ' + XmlUtils.getInternalName(curNode));
         return null;
     }
 
+
+
+    //finds the targetReference value
+    public static String findNextNodeName(Dom.XmlNode curNode) {
+        System.debug('finding next node name forthis node: ' + XmlUtils.getInternalName(curNode));
+        //if the curNode name is decisions do rules than connnector, else just connector 
+         
+        if (curNode.getName() == 'decisions'){
+            Dom.XmlNode nodeRulesElement = curNode.getChildElement('rules', SOAP_NS);
+            if (nodeRulesElement != null ) {
+               return getTargetReference(nodeRulesElement);
+            }
+            System.debug('failed to find next node name for this node: ' + XmlUtils.getInternalName(curNode));
+        } else {
+            return getTargetReference(curNode);
+        }
+        return null;
+
+    }
+
     public static void repositionActions(Dom.Document doc, Dom.XmlNode coreDecisionNode, String currentYPos) {
+        System.debug('entering repositionActions');
         Dom.XmlNode flowXml = doc.getRootElement();
-        Integer xPosition = 200;
+        Integer xPosition = 400;
         String nextNodeName= findNextNodeName(coreDecisionNode);
-        while (nextNodeName != null) {
-            Dom.XmlNode curNode = XmlUtils.getChildNodeByName(flowXML, nextNodeName);//find child of flowxml that has a child name element equal to this  generalize getChildProcessMetadataValueByName
-            
-            setXYPosition(curNode,String.valueOf(xPosition), currentYPos);
+        while (nextNodeName != null && !nextNodeName.contains('decision')) {
+            System.debug ('nextNodeName is: ' + nextNodeName);
+            //find child of flowxml that has a child name element equal to this  generalize getChildProcessMetadataValueByName
+            Dom.XmlNode targetNode = XmlUtils.getChildNodeByInternalName(flowXML, nextNodeName);
+            setXYPosition(targetNode,String.valueOf(xPosition), currentYPos);
             xPosition = xPosition + 150;
             //look in the node for another connector. if you find one, set nextNodeName equal to the new value, else set nextNodeName to null
+            nextNodeName = findNextNodeName(targetNode);
         } 
 
     }
 
     public static void setXYPosition(Dom.XmlNode curNode, String newXVal, String newYVal) {
-        //System.debug('changing the position of this node: ' + curNode);
+        System.debug('changing the position of this node: ' + XmlUtils.getInternalName(curNode) + ' to xval ' + newXVal + ' and to yval ' + newYVal);
         Dom.XmlNode curXPos = curNode.getChildElement('locationX', SOAP_NS);
         Dom.XmlNode curYPos = curNode.getChildElement('locationY', SOAP_NS);
         if (curXPos == null || curYPos == null)
@@ -183,7 +206,6 @@ public with sharing class ModifyFlowMetadata {
         String metadataString = doc.toXmlString();
         metadataString = metadataString.replace('Owner.Id', 'OwnerId');
         metadataString = metadataString.replace('User.Id', 'UserId');
-        System.debug('metadatastring is: ' + metadataString);
         Dom.Document convertedDoc = new Dom.Document();
         convertedDoc.load(metadataString);
         return convertedDoc;

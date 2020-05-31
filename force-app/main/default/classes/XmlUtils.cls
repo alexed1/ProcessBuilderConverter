@@ -32,10 +32,34 @@ public with sharing class XmlUtils {
         return targetValue;
 
     }
+   
+    public static Dom.XmlNode getChildNodeByInternalName(Dom.XmlNode flowXml, String target) {
+        System.debug ('getting child node with the name: ' + target);
+        List<Dom.XmlNode> allNodes = flowXml.getChildren();
+        //look across all of the main Flow elements
+        for (Dom.xmlNode curNode : allNodes) {
+            //inspect the Name element of each element, if it exists
+            for (Dom.XMLNode curNodeElement : curNode.getChildren()){
+                if (curNodeElement.getName() == 'name')
+                    if (curNodeElement.getText() == target)
+                        return curNode;
+            }
 
-    public static Dom.XmlNode getChildNodeByName(Dom.XmlNode flowXml, String target) {
-        //TODO 
-        return flowXML;
+        }
+        System.debug ('failed to find child node with the name ' + target);
+        return null;
+    }
+
+    public static String getInternalName(Dom.XmlNode curNode) {
+        if (curNode!= null){
+            Dom.XmlNode curNameElement = curNode.getChildElement('name', SOAP_NS);
+            if (curNameElement != null ) {
+                return curNameElement.getText();
+            }
+            else return 'No Name Element found on this node';
+        }
+        else return 'attempted to get the name of a null node';
+       
     }
 
     public static Dom.XmlNode getChildProcessMetadataValueByName(Dom.XmlNode flowXML, String pmvTargetName) {

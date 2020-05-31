@@ -59,11 +59,12 @@ export default class TransferMetadata extends LightningElement {
             this.jobId = result;
             
             if (!this.transferComplete) {
-                console.log('retrieval not complete');
+                console.log('initial retrieval not complete');
                 this.waitForRetrieval(this.jobId);
             }
         })
         .catch(error => {
+            console.log('error happened on initial retrieve call');
             this.error = error;
         });
     }
@@ -71,7 +72,7 @@ export default class TransferMetadata extends LightningElement {
     deploy() {
         console.log('beginning deployment');
         console.log('this.metadataName is: ' + this.metadataName);
-        console.log('this.metadataString is: ' + this.metadataString);
+        console.log('beginning deployment of this.metadataString is: ' + this.metadataString);
         console.log('this.objectTpe is: ' + this.objectType);
         this.modifiedName = this.metadataName + '_Converted';
         console.log('this.modifiedName is: ' + this.modifiedName);
@@ -106,7 +107,7 @@ export default class TransferMetadata extends LightningElement {
 
     waitForDeployment(jobId) {
         setTimeout(function(){ 
-            console.log('checking status. jobId is: ' + this.jobId);
+            console.log('checking status after wait. jobId is: ' + this.jobId);
             this.activity = 'Checking status...'
             self = this;
             this.checkDeploymentStatus(self);
@@ -148,7 +149,7 @@ export default class TransferMetadata extends LightningElement {
         checkRetrieveStatus({ jobId : this.jobId })
         .then(result => {
             console.log('successfully checked job status');
-            if (result != null){
+            if (result != 'inprocess'){
                 console.log('data returned');
                 console.log('data is: ' + result);
                 this.activity = 'process builder metadata retrieved successfully. '
@@ -161,14 +162,17 @@ export default class TransferMetadata extends LightningElement {
 
                 const nextNavigationEvent = new FlowNavigationNextEvent();
                 this.dispatchEvent(nextNavigationEvent);
-            } else {
-                console.log('not done yet');
-                waitForRetrieval(this.jobId);
-            }
+            } else  {
+                console.log('retrieval not complete for job id: ' + this.jobId);
+                this.waitForRetrieval(this.jobId);
+            } 
         })
         .catch(error => {
-            console.log('error checking async request. error is: ' + JSON.stringify(error));
+            console.log('error checking async request.');
             this.error = error;
+            //retry endlessly
+            console.log('retrying');
+            this.waitForRetrieval(this.jobId);
         });
     }
 

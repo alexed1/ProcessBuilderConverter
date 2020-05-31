@@ -4,6 +4,7 @@ public with sharing class ConvertFlowMetadata {
 
     @InvocableMethod
     public static List <Results> convert(List<Requests> requestList) {
+        System.debug('entering invocable method ConvertFlowMetadata.convert');
         Results response = new Results();
         List<Results> responseWrapper = new List<Results>();
         String flowName;
@@ -13,7 +14,7 @@ public with sharing class ConvertFlowMetadata {
             System.debug('flowname is:' + req.flowName);
 
             String flowmetadata = unpackZipfile( req.flowMetadataZipFile);
-            System.debug('unpackaged flowmetadata is: ' + flowmetadata);
+            System.debug('initial retrieved unconverted pb metadata is: ' + flowmetadata);
             String validtyProblemString = ValidateMetadata.validate (flowmetadata);
             System.debug('validtyProblemString is: ' + validtyProblemString);
             if(validtyProblemString == '') {
@@ -71,8 +72,10 @@ public with sharing class ConvertFlowMetadata {
         doc = ModifyFlowMetadata.changeContextReference(doc);  
         doc = ModifyFlowMetadata.fixupRelatedReferences(doc);
         ModifyFlowMetadata.repositionElements(doc);
-        System.debug ('doc is: ' + doc);     
+             
         String classText = doc.toXmlString();
+        System.debug('===========');
+        System.debug ('following all conversion, is: ' + classText);
         //deployChangedMetadata(classText, flowName, null, 'Flow');         
         return classText;
             

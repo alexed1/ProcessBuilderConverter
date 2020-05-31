@@ -116,7 +116,7 @@ RetrieveResult retrieveResult = metadataConnection.checkRetrieveStatus(response.
 		// Check the status of the retrieve request
 		MetadataService.MetadataPort service = createService();
 		MetadataService.RetrieveResult retrieveResult = service.checkRetrieveStatus(jobId, true);
-		if(retrieveResult.done)
+		if(retrieveResult.done == true)
 		{
 			// Errors?
 			if(retrieveResult.status != 'Succeeded')
@@ -131,11 +131,11 @@ RetrieveResult retrieveResult = metadataConnection.checkRetrieveStatus(response.
                 return retrieveResult.zipFile;
 			}
 		}
-		else
-		{
-					}	
-
-		return null;
+		else {
+			System.debug ('not done retrieving');
+			return 'inprocess';
+		}
+		 
 	}
 	
 
