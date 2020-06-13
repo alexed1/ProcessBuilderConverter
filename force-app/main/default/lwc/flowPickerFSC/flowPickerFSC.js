@@ -10,7 +10,7 @@ export default class flowPickerFSC extends LightningElement {
     @api required;
     @api showWhichFlowTypes = 'Flow,AutolaunchedFlow';
     @api placeholder = '- Select a Flow -';
-    @api componentWidth = '12';
+    @api componentWidth = '6';
     @track flowDefinitions;
 
     @wire(getFlowNamesApex, {filtersString: '$filters'})

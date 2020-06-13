@@ -15,13 +15,13 @@ public with sharing class ConvertFlowMetadata {
 
             String flowmetadata = unpackZipfile( req.flowMetadataZipFile);
             System.debug('initial retrieved unconverted pb metadata is: ' + flowmetadata);
-            String validtyProblemString = ValidateMetadata.validate (flowmetadata);
-            System.debug('validtyProblemString is: ' + validtyProblemString);
-            if(validtyProblemString == '') {
+            String validityProblemString = ValidateMetadata.validate (flowmetadata);
+            System.debug('validtyProblemString is: ' + validityProblemString);
+            if(validityProblemString == '') {
                 String metadataText = convertMetadata(flowmetadata, req.flowName);
                 response.convertedFlowMetadata = metadataText;
             } else {
-                response.errors = validtyProblemString;
+                response.errors = validityProblemString;
             }
             
             responseWrapper.add(response);

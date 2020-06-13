@@ -37,14 +37,18 @@ export default class TransferMetadata extends LightningElement {
 
 
     connectedCallback() {
-
-        this.activity = 'Beginning metadata transfer...';
-       if (this.transferMode == 'retrieve')
+ 
+       if (this.transferMode == 'retrieve') {
+            this.activity = 'Beginning metadata retrieval...';
             this.retrieve();
-       else if (this.transferMode == 'deploy')
-            this.deploy();
-            else {
-             console.log('transfermodeerror!');
+       }       
+       else if (this.transferMode == 'deploy') {
+        this.activity = 'Beginning metadata deployment...';
+        this.deploy();
+       }
+            
+        else {
+             console.log('transfer mode error!');
             }
     }
 
@@ -152,7 +156,7 @@ export default class TransferMetadata extends LightningElement {
             if (result != 'inprocess'){
                 console.log('data returned');
                 console.log('data is: ' + result);
-                this.activity = 'process builder metadata retrieved successfully. '
+                this.activity = 'Process Builder metadata retrieved successfully. '
                 console.log('this.activity is: ' + this.activity);
                 this.zipFileString = result;
                 const attributeChangeEvent = new FlowAttributeChangeEvent('zipFileString', this.zipFileString);
