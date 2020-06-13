@@ -2,9 +2,9 @@
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionCalls>
         <name>myRule_1_A1</name>
-        <label>testApexcall</label>
-        <locationX>383</locationX>
-        <locationY>200</locationY>
+        <label>Send Alert Email</label>
+        <locationX>400</locationX>
+        <locationY>300</locationY>
         <actionName>ConvertFlowMetadata</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -24,10 +24,36 @@
         </inputParameters>
     </actionCalls>
     <actionCalls>
+        <name>myRule_1_A3</name>
+        <label>Create Event</label>
+        <locationX>700</locationX>
+        <locationY>300</locationY>
+        <actionName>NewEvent</actionName>
+        <actionType>quickAction</actionType>
+        <inputParameters>
+            <name>EndDateTime</name>
+            <value>
+                <dateTimeValue>2021-04-02T07:00:00.000Z</dateTimeValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>StartDateTime</name>
+            <value>
+                <elementReference>$Record.LastViewedDate</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>OwnerId</name>
+            <value>
+                <elementReference>$Record.CreatedById</elementReference>
+            </value>
+        </inputParameters>
+    </actionCalls>
+    <actionCalls>
         <name>myRule_3_A1</name>
-        <label>Post3</label>
-        <locationX>583</locationX>
-        <locationY>200</locationY>
+        <label>Post Chatter Update</label>
+        <locationX>400</locationX>
+        <locationY>500</locationY>
         <actionName>chatterPost</actionName>
         <actionType>chatterPost</actionType>
         <connector>
@@ -54,13 +80,13 @@
     </actionCalls>
     <actionCalls>
         <name>myRule_3_A2</name>
-        <label>Post5</label>
-        <locationX>583</locationX>
-        <locationY>300</locationY>
+        <label>Post to Chatter User</label>
+        <locationX>550</locationX>
+        <locationY>500</locationY>
         <actionName>chatterPost</actionName>
         <actionType>chatterPost</actionType>
         <connector>
-            <targetReference>myDecision5</targetReference>
+            <targetReference>myRule_3_A3</targetReference>
         </connector>
         <inputParameters>
             <name>text</name>
@@ -79,10 +105,30 @@
         </inputParameters>
     </actionCalls>
     <actionCalls>
+        <name>myRule_3_A3</name>
+        <label>Submit for Approval</label>
+        <locationX>700</locationX>
+        <locationY>500</locationY>
+        <actionName>submit</actionName>
+        <actionType>submit</actionType>
+        <connector>
+            <targetReference>myDecision5</targetReference>
+        </connector>
+        <inputParameters>
+            <name>objectId</name>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>comment</name>
+        </inputParameters>
+    </actionCalls>
+    <actionCalls>
         <name>myRule_6_A1</name>
-        <label>Post4</label>
-        <locationX>883</locationX>
-        <locationY>200</locationY>
+        <label>Post Chatter Update</label>
+        <locationX>400</locationX>
+        <locationY>700</locationY>
         <actionName>chatterPost</actionName>
         <actionType>chatterPost</actionType>
         <inputParameters>
@@ -107,7 +153,7 @@
     <decisions>
         <name>myDecision</name>
         <label>myDecision</label>
-        <locationX>326</locationX>
+        <locationX>43</locationX>
         <locationY>300</locationY>
         <defaultConnector>
             <targetReference>myDecision2</targetReference>
@@ -126,13 +172,13 @@
             <connector>
                 <targetReference>myRule_1_A1</targetReference>
             </connector>
-            <label>FirstDecision</label>
+            <label>Rating = &#39;Hot&#39;</label>
         </rules>
     </decisions>
     <decisions>
         <name>myDecision2</name>
         <label>myDecision2</label>
-        <locationX>326</locationX>
+        <locationX>43</locationX>
         <locationY>500</locationY>
         <defaultConnector>
             <targetReference>myDecision5</targetReference>
@@ -152,19 +198,19 @@
                 <leftValueReference>$Record.Industry</leftValueReference>
                 <operator>EqualTo</operator>
                 <rightValue>
-                    <elementReference>formula_4_myRule_3_4864556725</elementReference>
+                    <elementReference>formula_4_myRule_3_6000054282</elementReference>
                 </rightValue>
             </conditions>
             <connector>
                 <targetReference>myRule_3_A1</targetReference>
             </connector>
-            <label>SecondDecision</label>
+            <label>Rating = &#39;Warm&#39;</label>
         </rules>
     </decisions>
     <decisions>
         <name>myDecision5</name>
         <label>myDecision5</label>
-        <locationX>326</locationX>
+        <locationX>43</locationX>
         <locationY>700</locationY>
         <defaultConnectorLabel>default</defaultConnectorLabel>
         <rules>
@@ -180,12 +226,11 @@
             <connector>
                 <targetReference>myRule_6_A1</targetReference>
             </connector>
-            <label>ThirdDecision</label>
+            <label>Rating = &#39;Cold&#39;</label>
         </rules>
     </decisions>
-    <description>x</description>
     <formulas>
-        <name>formula_4_myRule_3_4864556725</name>
+        <name>formula_4_myRule_3_6000054282</name>
         <dataType>String</dataType>
         <expression>&quot;formulatext&quot;</expression>
     </formulas>
@@ -194,8 +239,8 @@
         <dataType>Boolean</dataType>
         <expression>true</expression>
     </formulas>
-    <interviewLabel>TestProc_MultiDiamond-1_InterviewLabel</interviewLabel>
-    <label>TestProc_MultiDiamond</label>
+    <interviewLabel>tempbackup {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>tempbackup</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -206,8 +251,11 @@
     <recordUpdates>
         <name>myRule_1_A2</name>
         <label>Update Test</label>
-        <locationX>383</locationX>
+        <locationX>550</locationX>
         <locationY>300</locationY>
+        <connector>
+            <targetReference>myRule_1_A3</targetReference>
+        </connector>
         <filters>
             <field>AccountId</field>
             <operator>EqualTo</operator>

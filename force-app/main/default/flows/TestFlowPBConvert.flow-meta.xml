@@ -3,8 +3,8 @@
     <actionCalls>
         <name>Convert_Flow_Metadata</name>
         <label>Convert Flow Metadata</label>
-        <locationX>676</locationX>
-        <locationY>210</locationY>
+        <locationX>501</locationX>
+        <locationY>197</locationY>
         <actionName>ConvertFlowMetadata</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -27,8 +27,8 @@
     <decisions>
         <name>Inspect_Conversion_Results</name>
         <label>Inspect Conversion Results</label>
-        <locationX>808</locationX>
-        <locationY>378</locationY>
+        <locationX>633</locationX>
+        <locationY>365</locationY>
         <defaultConnector>
             <targetReference>Error_Reporting</targetReference>
         </defaultConnector>
@@ -50,7 +50,7 @@
         </rules>
     </decisions>
     <interviewLabel>TestFlowPBConvert {!$Flow.CurrentDateTime}</interviewLabel>
-    <label>TestFlowPBConvert</label>
+    <label>Convert Processes to Flows</label>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -67,8 +67,8 @@
     <screens>
         <name>Error_Reporting</name>
         <label>Error Reporting</label>
-        <locationX>352</locationX>
-        <locationY>392</locationY>
+        <locationX>177</locationX>
+        <locationY>379</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -86,8 +86,8 @@
     <screens>
         <name>Output_Screen</name>
         <label>Output Screen</label>
-        <locationX>811</locationX>
-        <locationY>108</locationY>
+        <locationX>636</locationX>
+        <locationY>95</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -131,8 +131,8 @@
     <screens>
         <name>Retrieve_Metadata</name>
         <label>Retrieve Metadata</label>
-        <locationX>490</locationX>
-        <locationY>267</locationY>
+        <locationX>315</locationX>
+        <locationY>254</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -170,8 +170,8 @@
     <screens>
         <name>Select_Flow</name>
         <label>Select Flow</label>
-        <locationX>351</locationX>
-        <locationY>210</locationY>
+        <locationX>176</locationX>
+        <locationY>197</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>

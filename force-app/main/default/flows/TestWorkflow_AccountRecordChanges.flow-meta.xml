@@ -34,7 +34,7 @@
         <expression>true</expression>
     </formulas>
     <interviewLabel>TestWorkflow_AccountRecordChanges-1_InterviewLabel</interviewLabel>
-    <label>TestWorkflow-AccountRecordChanges</label>
+    <label>Account Record Changes Process</label>
     <processMetadataValues>
         <name>ObjectType</name>
         <value>

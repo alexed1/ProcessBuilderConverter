@@ -32,6 +32,24 @@ public with sharing class XmlUtils {
         return targetValue;
 
     }
+
+    public static List<Dom.XmlNode> getChildrenByName(Dom.XmlNode flowXml, String elementName) {
+        System.debug ('getting children with the name: ' + elementName);
+        List<Dom.XmlNode> allNodes = flowXml.getChildren();
+        List<Dom.XMLNode> matchingNodes = new  List<Dom.XMLNode>();
+
+        //look across all of the main Flow elements
+        for (Dom.xmlNode curNode : allNodes) {
+            if (curNode.getName() == elementName)
+                   matchingNodes.add(curNode);
+            
+
+        }
+        System.debug ('number of nodes matching target: ' + elementName + ' ' + matchingNodes.size());
+        return matchingNodes;
+    
+
+    }
    
     public static Dom.XmlNode getChildNodeByInternalName(Dom.XmlNode flowXml, String target) {
         System.debug ('getting child node with the name: ' + target);
@@ -50,6 +68,7 @@ public with sharing class XmlUtils {
         return null;
     }
 
+    //look for a 'name' element in this node and return the name if you find it
     public static String getInternalName(Dom.XmlNode curNode) {
         if (curNode!= null){
             Dom.XmlNode curNameElement = curNode.getChildElement('name', SOAP_NS);

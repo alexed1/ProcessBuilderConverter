@@ -8,7 +8,7 @@
             </value>
         </processMetadataValues>
         <name>myRule_1_A1</name>
-        <label>testApexcall</label>
+        <label>Send Alert Email</label>
         <locationX>100</locationX>
         <locationY>200</locationY>
         <actionName>ConvertFlowMetadata</actionName>
@@ -103,6 +103,164 @@
     </actionCalls>
     <actionCalls>
         <processMetadataValues>
+            <name>filterType</name>
+            <value>
+                <stringValue>globalType</stringValue>
+            </value>
+        </processMetadataValues>
+        <processMetadataValues>
+            <name>quickActionSelection</name>
+            <value>
+                <stringValue>NewEvent</stringValue>
+            </value>
+        </processMetadataValues>
+        <processMetadataValues>
+            <name>quickActionSelectionType</name>
+            <value>
+                <stringValue>Event</stringValue>
+            </value>
+        </processMetadataValues>
+        <processMetadataValues>
+            <name>quickActionType</name>
+            <value>
+                <stringValue>create</stringValue>
+            </value>
+        </processMetadataValues>
+        <name>myRule_1_A3</name>
+        <label>Create Event</label>
+        <locationX>100</locationX>
+        <locationY>400</locationY>
+        <actionName>NewEvent</actionName>
+        <actionType>quickAction</actionType>
+        <inputParameters>
+            <processMetadataValues>
+                <name>dataType</name>
+                <value>
+                    <stringValue>DateTime</stringValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>isRequired</name>
+                <value>
+                    <booleanValue>true</booleanValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>leftHandSideLabel</name>
+                <value>
+                    <stringValue>End Date Time</stringValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>maxOccurs</name>
+                <value>
+                    <numberValue>1.0</numberValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>objectType</name>
+                <value>
+                    <stringValue/>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>rightHandSideType</name>
+                <value>
+                    <stringValue>DateTime</stringValue>
+                </value>
+            </processMetadataValues>
+            <name>EndDateTime</name>
+            <value>
+                <dateTimeValue>2021-04-02T07:00:00.000Z</dateTimeValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <processMetadataValues>
+                <name>dataType</name>
+                <value>
+                    <stringValue>DateTime</stringValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>isRequired</name>
+                <value>
+                    <booleanValue>true</booleanValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>leftHandSideLabel</name>
+                <value>
+                    <stringValue>Start Date Time</stringValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>maxOccurs</name>
+                <value>
+                    <numberValue>1.0</numberValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>objectType</name>
+                <value>
+                    <stringValue/>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>rightHandSideType</name>
+                <value>
+                    <stringValue>Reference</stringValue>
+                </value>
+            </processMetadataValues>
+            <name>StartDateTime</name>
+            <value>
+                <elementReference>myVariable_current.LastViewedDate</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <processMetadataValues>
+                <name>dataType</name>
+                <value>
+                    <stringValue>ID</stringValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>isRequired</name>
+                <value>
+                    <booleanValue>true</booleanValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>leftHandSideLabel</name>
+                <value>
+                    <stringValue>Assigned To ID</stringValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>maxOccurs</name>
+                <value>
+                    <numberValue>1.0</numberValue>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>objectType</name>
+                <value>
+                    <stringValue/>
+                </value>
+            </processMetadataValues>
+            <processMetadataValues>
+                <name>rightHandSideType</name>
+                <value>
+                    <stringValue>Reference</stringValue>
+                </value>
+            </processMetadataValues>
+            <name>OwnerId</name>
+            <value>
+                <elementReference>myVariable_current.CreatedById</elementReference>
+            </value>
+        </inputParameters>
+    </actionCalls>
+    <actionCalls>
+        <processMetadataValues>
             <name>postTargetUserType</name>
             <value>
                 <stringValue>REFERENCE</stringValue>
@@ -115,7 +273,7 @@
             </value>
         </processMetadataValues>
         <name>myRule_3_A1</name>
-        <label>Post3</label>
+        <label>Post Chatter Update</label>
         <locationX>300</locationX>
         <locationY>200</locationY>
         <actionName>chatterPost</actionName>
@@ -150,13 +308,13 @@
             </value>
         </processMetadataValues>
         <name>myRule_3_A2</name>
-        <label>Post5</label>
+        <label>Post to Chatter User</label>
         <locationX>300</locationX>
         <locationY>300</locationY>
         <actionName>chatterPost</actionName>
         <actionType>chatterPost</actionType>
         <connector>
-            <targetReference>myDecision5</targetReference>
+            <targetReference>myRule_3_A3</targetReference>
         </connector>
         <inputParameters>
             <name>text</name>
@@ -176,6 +334,38 @@
     </actionCalls>
     <actionCalls>
         <processMetadataValues>
+            <name>selectionType</name>
+            <value>
+                <stringValue>firstFound</stringValue>
+            </value>
+        </processMetadataValues>
+        <processMetadataValues>
+            <name>submitterType</name>
+            <value>
+                <stringValue>currentUser</stringValue>
+            </value>
+        </processMetadataValues>
+        <name>myRule_3_A3</name>
+        <label>Submit for Approval</label>
+        <locationX>300</locationX>
+        <locationY>400</locationY>
+        <actionName>submit</actionName>
+        <actionType>submit</actionType>
+        <connector>
+            <targetReference>myDecision5</targetReference>
+        </connector>
+        <inputParameters>
+            <name>objectId</name>
+            <value>
+                <elementReference>myVariable_current.Id</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>comment</name>
+        </inputParameters>
+    </actionCalls>
+    <actionCalls>
+        <processMetadataValues>
             <name>postTargetUserType</name>
             <value>
                 <stringValue>REFERENCE</stringValue>
@@ -188,7 +378,7 @@
             </value>
         </processMetadataValues>
         <name>myRule_6_A1</name>
-        <label>Post4</label>
+        <label>Post Chatter Update</label>
         <locationX>600</locationX>
         <locationY>200</locationY>
         <actionName>chatterPost</actionName>
@@ -264,7 +454,7 @@
             <connector>
                 <targetReference>myRule_1_A1</targetReference>
             </connector>
-            <label>FirstDecision</label>
+            <label>Rating = &#39;Hot&#39;</label>
         </rules>
     </decisions>
     <decisions>
@@ -344,13 +534,13 @@
                 <leftValueReference>myVariable_current.Industry</leftValueReference>
                 <operator>EqualTo</operator>
                 <rightValue>
-                    <elementReference>formula_4_myRule_3_4864556725</elementReference>
+                    <elementReference>formula_4_myRule_3_4866932976</elementReference>
                 </rightValue>
             </conditions>
             <connector>
                 <targetReference>myRule_3_A1</targetReference>
             </connector>
-            <label>SecondDecision</label>
+            <label>Rating = &#39;Warm&#39;</label>
         </rules>
     </decisions>
     <decisions>
@@ -378,7 +568,7 @@
             <connector>
                 <targetReference>myRule_6_A1</targetReference>
             </connector>
-            <label>ThirdDecision</label>
+            <label>Rating = &#39;Cold&#39;</label>
         </rules>
     </decisions>
     <formulas>
@@ -388,7 +578,7 @@
                 <stringValue>&quot;formulatext&quot;</stringValue>
             </value>
         </processMetadataValues>
-        <name>formula_4_myRule_3_4864556725</name>
+        <name>formula_4_myRule_3_4866932976</name>
         <dataType>String</dataType>
         <expression>&quot;formulatext&quot;</expression>
     </formulas>
@@ -398,7 +588,7 @@
         <expression>true</expression>
     </formulas>
     <interviewLabel>TestProc_MultiDiamond-1_InterviewLabel</interviewLabel>
-    <label>TestProc_MultiDiamond</label>
+    <label>Account Rating Automation Process</label>
     <processMetadataValues>
         <name>ObjectType</name>
         <value>
@@ -459,6 +649,9 @@
         <label>Update Test</label>
         <locationX>100</locationX>
         <locationY>300</locationY>
+        <connector>
+            <targetReference>myRule_1_A3</targetReference>
+        </connector>
         <filters>
             <processMetadataValues>
                 <name>implicit</name>
