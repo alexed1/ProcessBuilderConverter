@@ -1,5 +1,6 @@
 import {LightningElement, api, track, wire} from 'lwc';
 import getFlowNamesApex from '@salesforce/apex/FlowListController.getFlowNamesApex';
+import getWFRDataApex from '@salesforce/apex/FlowListController.getWFRDataApex';
 import {FlowAttributeChangeEvent} from 'lightning/flowSupport';
 
 export default class flowPickerFSC extends LightningElement {
@@ -11,14 +12,26 @@ export default class flowPickerFSC extends LightningElement {
     @api showWhichFlowTypes = 'Flow,AutolaunchedFlow';
     @api placeholder = '- Select a Flow -';
     @api componentWidth = '6';
+    @api targetObject;
     @track flowDefinitions;
+    @track wfrDefinitions;
 
     @wire(getFlowNamesApex, {filtersString: '$filters'})
     _getFlowNamesApex({error, data}) {
-        if (error) {
+    if (error) {
             console.log(error.body.message);
         } else if (data) {
             this.flowDefinitions = data;
+        }
+    }
+
+    @wire(getWFRDataApex, {})
+    _getWFRDataApex({error, data}) {
+    if (error) {
+            console.log(error.body.message);
+        } else if (data) {
+            this.wfrDefinitions = data;
+            console.log('got back data from WFR call: ' + JSON.stringify(data));
         }
     }
 
@@ -45,7 +58,9 @@ export default class flowPickerFSC extends LightningElement {
     }
 
     get options() {
+
         if (this.flowDefinitions) {
+           
             return this.flowDefinitions.map(curFD => {
                 return {
                     value: curFD.ApiName,
@@ -53,6 +68,24 @@ export default class flowPickerFSC extends LightningElement {
                 }
             });
         } else {
+           
+            return [];
+        }
+    }
+
+    //this should be cleaned up and merged with options. there should be a single definitions that gets mapped one way for flows and another way for wfrs. it's all too damn touchy for me so i have it separate
+    get options2() {
+        console.log ('in options2');
+        if (this.wfrDefinitions) {
+            console.log('wfrDefinitions: ' + JSON.stringify(this.wfrDefinitions));
+            return this.wfrDefinitions.map(curFD => {
+                return {
+                    value: curFD,
+                    label: curFD
+                }
+            });
+        } else {
+            console.log('wfrdef empty');
             return [];
         }
     }

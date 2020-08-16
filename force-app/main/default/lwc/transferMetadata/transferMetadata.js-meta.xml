@@ -9,6 +9,7 @@
         <targetConfig targets="lightning__FlowScreen">
             <property name="zipFileString" type="String" role="outputOnly"  />
             <property name="metadataName" type="String"   />
+            <property name="metadataType" type="String"   /> <!-- delete this -->
             <property name="transferMode" type="String"   />
             <property name="objectType" type="String"   />
             <property name="metadataString" type="String"   />

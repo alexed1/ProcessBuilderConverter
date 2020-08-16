@@ -43,4 +43,29 @@ global with sharing class FlowListController {
         System.debug('query string is: ' + queryString);
         return (List<FlowDefinitionView>) Database.query(queryString);
     }
+
+    @AuraEnabled(cacheable=true)
+    public static List<String> getWFRDataApex() {
+        List<String> curWFRNames = new List<String>();
+        System.debug('entering getWFRDataApex');
+        MetadataService.MetadataPort service = RetrieveMetadata.createService();				
+          
+        List<MetadataService.ListMetadataQuery> queries = new List<MetadataService.ListMetadataQuery>();        
+        MetadataService.ListMetadataQuery queryWorkflow = new MetadataService.ListMetadataQuery();
+        queryWorkflow.type_x = 'WorkflowRule';
+        queries.add(queryWorkflow);     
+           
+        MetadataService.FileProperties[] fileProperties = service.listMetadata(queries, 25);
+        for(MetadataService.FileProperties fileProperty : fileProperties){
+            String curWFRdef =  fileProperty.fullName;
+            System.debug(fileProperty.fullName);
+            curWFRNames.add(curWFRdef);
+        }
+           
+        System.debug (curWFRNames);
+        return curWFRNames;
+
+    }
+
+   
 }

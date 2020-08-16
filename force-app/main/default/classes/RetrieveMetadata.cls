@@ -65,10 +65,10 @@ RetrieveResult retrieveResult = metadataConnection.checkRetrieveStatus(response.
 
     
     @auraEnabled
-	public static String retrieveMetadataItem(String metadataName)
+	public static String retrieveMetadataItem(String metadataName, String metadataType)
 	{		
         
-	   System.debug('entering retrieveMetadataItem with metadataName: ' + metadataName);
+	   System.debug('entering retrieveMetadataItem with metadataName: ' + metadataName + ' and metadata Type: ' + metadataType);
 
 
 
@@ -92,7 +92,7 @@ RetrieveResult retrieveResult = metadataConnection.checkRetrieveStatus(response.
         MetadataService.PackageTypeMembers packageType = new MetadataService.PackageTypeMembers();
         
         //Flow-specific code
-		packageType.name = 'Flow'; 
+		packageType.name = metadataType; 
 		packageType.members = new String[] { metadataName };
         retrieveRequest.unpackaged.types.add(packageType);
         System.debug('retrieve request is: ' + retrieveRequest);
@@ -159,7 +159,7 @@ RetrieveResult retrieveResult = metadataConnection.checkRetrieveStatus(response.
 	}
 
 	
-	private static MetadataService.MetadataPort createService()
+	public static MetadataService.MetadataPort createService()
 	{ 
 		MetadataService.MetadataPort service = new MetadataService.MetadataPort();
 		service.SessionHeader = new MetadataService.SessionHeader_element();

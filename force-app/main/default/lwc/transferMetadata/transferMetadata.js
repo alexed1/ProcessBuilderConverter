@@ -18,9 +18,11 @@ export default class TransferMetadata extends LightningElement {
     transferComplete = false;
     @api zipFileString = '';
     @api metadataName;
+    @api metadataType;
     @api transferMode;
     @api metadataString;
     @api objectType;
+    @api targetObject;
     modifiedName;
 
     //@wire(getFileNames ,{ zipfile : '$zipFileString'})
@@ -53,8 +55,8 @@ export default class TransferMetadata extends LightningElement {
     }
 
     retrieve() {
-        console.log('beginning retrieval');
-        requestMetadata({ metadataName : this.metadataName })
+        console.log('beginning retrieval of metadata name: ' + this.metadataName);
+        requestMetadata({ metadataName : this.metadataName , metadataType : this.objectType})
         .then(result => {
             
             console.log('successfully sent async retrieval request');

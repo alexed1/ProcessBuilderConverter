@@ -13,6 +13,7 @@
     "sourceApiVersion": "48.0",
     "packageAliases": {
         "pbconvert": "0HoB0000000Cb2yKAC",
-        "pbconvert@1.0.0-0": "04tB0000000P0GVIA0"
+        "pbconvert@1.0.0-0": "04tB0000000P0GVIA0",
+        "pbconvert@1.0.1-0": "04tB0000000P2ysIAC"
     }
 }
