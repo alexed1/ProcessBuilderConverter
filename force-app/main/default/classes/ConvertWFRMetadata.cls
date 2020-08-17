@@ -15,16 +15,22 @@ public with sharing class ConvertWFRMetadata {
 
             String wfrmetadata = unpackZipfile( req.wfrMetadataZipFile);
             System.debug('initial retrieved unconverted wfr metadata is: ' + wfrmetadata);
-            //String validityProblemString = ValidateMetadata.validate (wfrmetadata);
-            /* String validityProblemString = '';
+
+
+            Dom.Document doc = new Dom.Document();
+            doc.load(wfrmetadata);
+            Dom.XMLNode wfrXML = doc.getRootElement();
+
+
+            String validityProblemString = ValidateWFRMetadata.validateRule (wfrXML, req.wfrName);
+            //String validityProblemString = '';
             System.debug('validtyProblemString is: ' + validityProblemString);
             if(validityProblemString == '') {
-                String metadataText = convertMetadata(wfrmetadata, req.wfrName);
-                response.convertedFlowMetadata = metadataText;
+                response.convertedFlowMetadata = convertMetadata(wfrXML, req.wfrName);
             } else {
                 response.errors = validityProblemString;
-            } */
-            response.convertedFlowMetadata = wfrmetadata;
+            } 
+            //response.convertedFlowMetadata = wfrmetadata;
             responseWrapper.add(response);
         }
         return responseWrapper;
@@ -46,35 +52,36 @@ public with sharing class ConvertWFRMetadata {
         return  fileData.toString();
     }
 
-    public static String convertMetadata(String metadata, String flowName) {
-        Dom.Document doc = new Dom.Document();
-        doc.load(metadata);
-        Dom.XMLNode flowXML = doc.getRootElement();
-       // System.debug('root node is:' + flowXML);
+    public static String convertMetadata(Dom.XmlNode wfrXML, String wfrName) {
        
-        Dom.XmlNode pmv_ObjectType = XmlUtils.getChildProcessMetadataValueByName(flowXML,'ObjectType');
-        String contextObjectType = XmlUtils.getProcessMetadataValue(pmv_ObjectType);
-        System.debug('contextObjectType for flow: ' + flowName +' is: ' + contextObjectType);
+       // System.debug('root node is:' + wfrXML);
+       
+        //Dom.XmlNode pmv_ObjectType = XmlUtils.getChildProcessMetadataValueByName(wfrXML,'ObjectType');
+        //String contextObjectType = XmlUtils.getProcessMetadataValue(pmv_ObjectType);
+        //System.debug('contextObjectType for flow: ' + flowName +' is: ' + contextObjectType);
 
-        Dom.XmlNode  pmv_TriggerType = XmlUtils.getChildProcessMetadataValueByName(flowXML,'TriggerType');
-        String triggerType = XmlUtils.getProcessMetadataValue(pmv_TriggerType);
-        System.debug('triggerType for flow: ' + flowName +' is: ' + triggerType); 
-        String startElementReference = flowXML.getChildElement('startElementReference', SOAP_NS).getText();
-        String newProcessType = 'AutolaunchedFlow';
+        //Dom.XmlNode  pmv_TriggerType = XmlUtils.getChildProcessMetadataValueByName(wfrXML,'TriggerType');
+       // String triggerType = XmlUtils.getProcessMetadataValue(pmv_TriggerType);
+        //System.debug('triggerType for flow: ' + flowName +' is: ' + triggerType); 
+        //String startElementReference = wfrXML.getChildElement('startElementReference', SOAP_NS).getText();
+       // String newProcessType = 'AutolaunchedFlow';
         
-        flowXML = ModifyFlowMetadata.changeProcessType(flowXML, newProcessType);
-        flowXML = ModifyFlowMetadata.setStatus(flowXML, 'Draft' );
-        flowXML = ModifyFlowMetadata.addStartElement(flowXML, contextObjectType, triggerType, startElementReference);
-        ModifyFlowMetadata.removeExcessPMV(flowXML, 'ObjectType');
-        ModifyFlowMetadata.removeExcessPMV(flowXML, 'ObjectVariable');
-        ModifyFlowMetadata.removeExcessPMV(flowXML, 'OldObjectVariable');
-        ModifyFlowMetadata.removeExcessPMV(flowXML, 'RecursiveCountVariable');
-        ModifyFlowMetadata.removeExcessPMV(flowXML, 'TriggerType');
+    /*     wfrXML = ModifyFlowMetadata.changeProcessType(wfrXML, newProcessType);
+        wfrXML = ModifyFlowMetadata.setStatus(wfrXML, 'Draft' );
+        wfrXML = ModifyFlowMetadata.addStartElement(wfrXML, contextObjectType, triggerType, startElementReference);
+        ModifyFlowMetadata.removeExcessPMV(wfrXML, 'ObjectType');
+        ModifyFlowMetadata.removeExcessPMV(wfrXML, 'ObjectVariable');
+        ModifyFlowMetadata.removeExcessPMV(wfrXML, 'OldObjectVariable');
+        ModifyFlowMetadata.removeExcessPMV(wfrXML, 'RecursiveCountVariable');
+        ModifyFlowMetadata.removeExcessPMV(wfrXML, 'TriggerType');
         doc = ModifyFlowMetadata.changeContextReference(doc);  
         doc = ModifyFlowMetadata.fixupRelatedReferences(doc);
-        ModifyFlowMetadata.repositionElements(doc);
+        ModifyFlowMetadata.repositionElements(doc); */
+
+        //workflow metadata contains multiple rules. we will convert one at a time based on name
+        Dom.XMLNode rulesEntity = ValidateWFRMetadata.getRulesEntity(wfrXML);
              
-        String classText = doc.toXmlString();
+        String classText = ''; //doc.toXmlString();
         System.debug('===========');
         System.debug ('following all conversion, is: ' + classText);
         //deployChangedMetadata(classText, flowName, null, 'Flow');         
