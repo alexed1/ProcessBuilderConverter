@@ -10,7 +10,7 @@ public with sharing class ValidateWFRMetadata {
 
         
 
-        public static string validateRule(Dom.XMLNode wfrMetadata, String ruleName) {
+        public static string validateRule(Dom.XMLNode wfrXML, String ruleName) {
 
             ValidateWFRMetadata.ruleName = ruleName;
             
@@ -19,7 +19,7 @@ public with sharing class ValidateWFRMetadata {
            
 
             //get the matching rules entity. The other ones won't be used
-            Dom.XMLNode rulesEntity = getRulesEntity(wfrMetadata);
+            Dom.XMLNode rulesEntity = getRulesEntity(wfrXML, ruleName);
 
             
 
@@ -108,10 +108,9 @@ public with sharing class ValidateWFRMetadata {
             return validityProblemString; */
         }
 
-    public static Dom.XmlNode getRulesEntity (Dom.XmlNode wfrMetadata) {
-        Dom.XmlNode curRules = wfrMetadata;
-
-        return curRules;
+    public static Dom.XmlNode getRulesEntity (Dom.XmlNode wfrXML, String ruleName) {
+        Dom.XmlNode curRule = XmlUtils.getChildNodeByName(wfrXML, 'fullName',  'rules',  ruleName);
+        return curRule;
 
     }
 

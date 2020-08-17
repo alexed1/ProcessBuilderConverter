@@ -81,6 +81,47 @@ public with sharing class XmlUtils {
        
     }
 
+    //this general search will return the specific node that has a child that matches the inputs
+    //example:
+    //given:
+        /* <Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+                
+            <rules>
+                <fullName>wfr_acct1</fullName>
+
+            </rules>
+            <rules>
+                <fullName>wfr_acct2</fullName>
+            </rules>
+        </Workflow> */
+
+    // if you want to extract the rules entity with the fullName wfr_acct1, you would set:
+    // indexEntityName = 'fullName';
+    //entityTypeName = 'rules';
+    //targetName 'wfr_acct1';
+
+
+    public static Dom.XmlNode getChildNodeByName(Dom.XmlNode baseXML, String indexEntityName, String entityTypeName, String targetName) {
+        for(Dom.XMLNode childElement : baseXML.getChildElements()) {
+            if (childElement.getName() == entityTypeName) {
+                for (Dom.XMLNode grandchildElement : childElement.getChildElements()){
+                    //System.debug('the current child of the processmetadatavalue element is ' + pmvChild);
+                    if (grandchildElement.getName() == indexEntityName) {
+                       // System.debug ('this child is named name');
+                        if (grandchildElement.getText() == targetName) {
+                            System.debug ('theres a match between the value of this element and the passed in value: ' + targetName);
+                            return childElement;
+                        }
+                    }
+                }
+            }
+            
+        }
+        throw new PBConvertException('tried but failed to find a node with the name: '+ entityTypeName + 'that matched the criteria');
+ 
+    }
+
+
     public static Dom.XmlNode getChildProcessMetadataValueByName(Dom.XmlNode flowXML, String pmvTargetName) {
         for(Dom.XMLNode pmv : flowXML.getChildElements()) {
            // System.debug('current child element of flow is: ' + pmv);
