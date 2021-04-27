@@ -29,7 +29,11 @@ global with sharing class FlowListController {
                 queryString += ' WHERE ';
                 Boolean isFirst = true;
                 for (String fieldName : filters.keySet()) {
-                    List<String> values = filters.get(fieldName);
+                    List<String> values = filters.get(fieldName); //'ProcessBuilder' ? 'Wrokflow' : filters.get(fieldName);
+                    for(String value : values) {
+                        value = (value == 'ProcessBuilder') ? 'Wrokflow' : value;
+                        //System.debug('values ' + value + values);
+                    }
                     String negativeClause = fieldName.contains('!') ? (values.size() > 1 ? 'NOT ' : '!') : '';
                     String operator = fieldName.contains('Label') ? 'LIKE ' : (values.size() == 1 ? '= ' : 'IN ');  // Updated to Handle Search String
                     String value = values.size() == 1 ?  '\'' + values[0] + '\'' : '(\'' + String.join(values, '\',\'') + '\')';

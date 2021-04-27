@@ -12,7 +12,6 @@ public with sharing class ConvertFlowMetadata {
         for (Requests req : requestList) {
             System.debug('zip file text is:' + req.flowMetadataZipFile);
             System.debug('flowname is:' + req.flowName);
-
             String flowmetadata = unpackZipfile( req.flowMetadataZipFile);
             System.debug('initial retrieved unconverted pb metadata is: ' + flowmetadata);
             String validityProblemString = ValidateMetadata.validate (flowmetadata);

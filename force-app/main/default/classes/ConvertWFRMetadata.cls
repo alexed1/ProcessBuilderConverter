@@ -4,29 +4,26 @@ public with sharing class ConvertWFRMetadata {
 
     @InvocableMethod
     public static List <Results> convert(List<Requests> requestList) {
-        System.debug('entering invocable method ConvertWFRMetadata.convert');
+        //try {System.debug('entering invocable method ConvertWFRMetadata.convert');
         Results response = new Results();
         List<Results> responseWrapper = new List<Results>();
         //String flowName;
 
         for (Requests req : requestList) {
-            System.debug('zip file text is:' + req.wfrMetadataZipFile);
-            System.debug('wfrname is:' + req.wfrName);
 
             String wfrmetadata = unpackZipfile( req.wfrMetadataZipFile);
-            System.debug('initial retrieved unconverted wfr metadata is: ' + wfrmetadata);
+
 
 
             Dom.Document doc = new Dom.Document();
             doc.load(wfrmetadata);
             Dom.XMLNode wfrXML = doc.getRootElement();
 
-
             String validityProblemString = ValidateWFRMetadata.validateRule (wfrXML, req.wfrName);
             //String validityProblemString = '';
             System.debug('validtyProblemString is: ' + validityProblemString);
             if(validityProblemString == '') {
-                response.convertedFlowMetadata = convertMetadata(wfrXML, req.wfrName);
+                //response.convertedFlowMetadata = convertMetadata(wfrXML, req.wfrName);
             } else {
                 response.errors = validityProblemString;
             } 
@@ -79,7 +76,7 @@ public with sharing class ConvertWFRMetadata {
         ModifyFlowMetadata.repositionElements(doc); */
 
         //workflow metadata contains multiple rules. we will convert one at a time based on name
-        Dom.XMLNode rulesEntity = ValidateWFRMetadata.getRulesEntity(wfrXML);
+        //Dom.XMLNode rulesEntity = ValidateWFRMetadata.getRulesEntity(wfrXML);
              
         String classText = ''; //doc.toXmlString();
         System.debug('===========');
