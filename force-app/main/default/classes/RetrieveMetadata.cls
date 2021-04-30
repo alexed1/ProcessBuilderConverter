@@ -73,7 +73,7 @@ RetrieveResult retrieveResult = metadataConnection.checkRetrieveStatus(response.
 
 
 
-        
+        metadataType = (metadataType == 'ProcessBuilder') ? 'Flow' : metadataType;
 		// Reset state from any previous requests
 		MetaDataRetrieveZip = null;
 		MetadataFiles = null;

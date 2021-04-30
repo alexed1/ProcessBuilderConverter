@@ -56,11 +56,13 @@ public with sharing class ValidateWFRMetadata {
         Boolean isValid = true;
 
         for(Dom.XmlNode node : ValidateWFRMetadata.wfrMetadata.getChildren()) {
-            if(node.getName() == 'fieldUpdates') {
+            
+            if(node.getName() == 'fieldUpdates' && node.getChildElement('fullName', SOAP_NS).getText() == fieldUpdateName) {
+                System.debug('fieldupdate' + node.getChildElement('operation', SOAP_NS).getText());
                 if(
-                    node.getChildElement('operation', SOAP_NS).getText() != 'Literal' 
+                    (node.getChildElement('operation', SOAP_NS).getText() != 'Literal' && node.getChildElement('operation', SOAP_NS).getText()!= 'Null')
                     ||
-                    node.getChildElement('reevaluateOnChange', SOAP_NS).getText() != 'true'
+                    (node.getChildElement('reevaluateOnChange', SOAP_NS) != null && node.getChildElement('reevaluateOnChange', SOAP_NS).getText() == 'true')
                     ){
                     isValid = false;
                 }
@@ -95,7 +97,7 @@ public with sharing class ValidateWFRMetadata {
             when 'OutboundMessage', 'KnowledgePublish', 'Task', 'FlowAction' {
                 ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + ' \n This rule contains one of the following: OutboundMessage, Task, KnowledgePublish, FlowAction. Currently the converter doesn\'t support rules that have these. ';
             }
-            when else {
+            when 'FieldUpdate' {
                 if (isValidFieldUpdate(name) == true) {
                     ValidateWFRMetadata.validFieldUpdateNames.add(name);
                 } else {

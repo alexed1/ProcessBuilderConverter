@@ -65,7 +65,7 @@ export default class flowPickerFSC extends LightningElement {
                     label: curFD
                 }
             });
-        } else if (this.flowDefinitions) {
+        } else if (this.flowDefinitions && this.showWhichFlowTypes != 'Workflow') {
            
             return this.flowDefinitions.map(curFD => {
                 return {
