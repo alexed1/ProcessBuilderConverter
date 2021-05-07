@@ -14,18 +14,11 @@ public with sharing class ConvertFlowMetadata {
             //System.debug('flowname is:' + req.flowName);
 
             String flowmetadata = unpackZipfile( req.flowMetadataZipFile);
-            Account a = new Account();
-            a.Id = '0019D00000G9thIQAR';
-            a.Test__c = flowmetadata;
-            update a;
             //System.debug('initial retrieved unconverted pb metadata is: ' + flowmetadata);
             String validityProblemString = ValidateMetadata.validate (flowmetadata);
             //System.debug('validtyProblemString is: ' + validityProblemString);
             if(validityProblemString == '') {
                 String metadataText = convertMetadata(flowmetadata, req.flowName);
-                a.Id = '0019D00000G9thIQAR';
-                a.Test2__c = metadataText;
-                update a;
                 response.convertedFlowMetadata = metadataText;
             } else {
                 response.errors = validityProblemString;
