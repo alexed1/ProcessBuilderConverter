@@ -4,6 +4,7 @@ public with sharing class DeployMetadata {
     public static String deploy(String metadataText, String metadataName, String testLevel, String objectType) {
         System.debug('entering deploy. metadata text, objectname, testlevel, and object type are:' );
        // System.debug ('metadataText: ' + metadataText);
+       metadataName = metadataName.replace('.', '_').replace(' ', '_');
         System.debug ('objectName: ' + metadataName);
         System.debug ('testLevel: ' + testLevel);
         System.debug ('objectType: ' + objectType);

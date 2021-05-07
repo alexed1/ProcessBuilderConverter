@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Flow xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionCalls>
         <name>Convert_Flow_Metadata</name>
         <label>Convert Flow Metadata</label>
@@ -29,8 +29,8 @@
         <label>Convert WorkflowRule</label>
         <locationX>450</locationX>
         <locationY>255</locationY>
-        <actionName>01p9A000003aTCYNotFound</actionName>
-        <actionType xsi:nil="true"/>
+        <actionName>ConvertWFRMetadata</actionName>
+        <actionType>apex</actionType>
         <connector>
             <targetReference>DisplayScreen</targetReference>
         </connector>
@@ -48,6 +48,7 @@
         </inputParameters>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </actionCalls>
+    <apiVersion>49.0</apiVersion>
     <decisions>
         <name>Inspect_Conversion_Results</name>
         <label>Inspect Conversion Results</label>
@@ -61,7 +62,7 @@
             <name>Conversion_Successful</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>Convert_Flow_Metadata.errors</leftValueReference>
+                <leftValueReference>Convert_WorkflowRule.errors</leftValueReference>
                 <operator>IsNull</operator>
                 <rightValue>
                     <booleanValue>true</booleanValue>
@@ -102,9 +103,12 @@
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
+        <connector>
+            <targetReference>Inspect_Conversion_Results</targetReference>
+        </connector>
         <fields>
             <name>dispWFR</name>
-            <fieldText>&lt;p&gt;retrieved metadata:&lt;/p&gt;&lt;p&gt; {!Convert_WorkflowRule.convertedFlowMetadata}&lt;/p&gt;</fieldText>
+            <fieldText>&lt;p&gt;retrieved metadata:&lt;/p&gt;&lt;p&gt;{!Convert_WorkflowRule.convertedFlowMetadata}&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;{!Convert_WorkflowRule.errors}&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
         <showFooter>true</showFooter>
@@ -132,8 +136,8 @@
     <screens>
         <name>Output_Screen</name>
         <label>Output Screen</label>
-        <locationX>636</locationX>
-        <locationY>95</locationY>
+        <locationX>642</locationX>
+        <locationY>110</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -153,7 +157,7 @@
             <inputParameters>
                 <name>metadataString</name>
                 <value>
-                    <elementReference>Convert_Flow_Metadata.convertedFlowMetadata</elementReference>
+                    <elementReference>Convert_WorkflowRule.convertedFlowMetadata</elementReference>
                 </value>
             </inputParameters>
             <inputParameters>
@@ -192,7 +196,7 @@
             <inputParameters>
                 <name>metadataName</name>
                 <value>
-                    <stringValue>*</stringValue>
+                    <elementReference>selectWFR.selectedFlowApiName</elementReference>
                 </value>
             </inputParameters>
             <inputParameters>

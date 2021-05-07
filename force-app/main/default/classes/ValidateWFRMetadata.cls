@@ -13,13 +13,11 @@ public with sharing class ValidateWFRMetadata {
         public static string validateRule(Dom.XMLNode wfrXML, String ruleName) {
 
             ValidateWFRMetadata.ruleName = ruleName;
-            
-             
-    
-           
+            ValidateWFRMetadata.wfrMetadata = wfrXML;
+            //Retrieve the root element for this document.               
 
             //get the matching rules entity. The other ones won't be used
-            Dom.XMLNode rulesEntity = getRulesEntity(wfrXML, ruleName);
+            Dom.XMLNode rulesEntity = getRulesEntity(wfrXML, ruleName.split('\\.')[1]);
 
             
 
@@ -30,82 +28,12 @@ public with sharing class ValidateWFRMetadata {
 
             //get and validate the corresponding action entities
             List<Dom.XmlNode> actionEntities = getRuleActions(rulesEntity);
+            System.debug('actionEntities'  + actionEntities.size() + actionEntities);
             for(Dom.XmlNode actionEntity : actionEntities) {
                 validateActionEntity(actionEntity);
             }
 
             return ValidateWFRMetadata.validityProblemString;
-/* 
-
-            //Flow currently doesn't support Scheduled Actions as part of a record change-triggered Flow, so filter out flows with Pause element
-            Dom.XmlNode waitNodes = flowXML.getChildElement('waits', SOAP_NS);
-            if (waitNodes != null)
-            ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + 'Triggers in Flow Builder do not currently support Scheduled Actions, and this Process Builder process has at least 1. \n';
-    
-    
-            //Flow doesn't support IsChanged, IsNew, and PriorValue yet
-            //IsChanged can manifest in three ways:
-            // 1. a decisions element with a name like this:   <name>isChangedDecision4_myRule_3_Rating</name>
-            // 2. a decisions element that reference a formula with an expression that includes:  ISCHANGED:  <expression> ISCHANGED({!myVariable_current.Industry} )</expression>
-            // 3. a decisions element that has 'pmetdec', which is used to evaluate for a previously met decisions. this corresponds to the Advanced 'execute only when changes are made' checkbox in the Decisions critera
-            //terminate conversion if any of these are found
-    
-            //get all decision elements, for each element, if one of these is true, then validate problem string = x
-            List<Dom.XmlNode> decisionNodes = XmlUtils.getChildrenByName(flowXml, 'decisions');
-            for (Dom.XMLNode curDecision : decisionNodes) {
-                if (containsIsChangedInName(curDecision))
-                    validityProblemString = validityProblemString + 'The selected process uses IsChanged operator, and Flow doesn\'t currently support that. \n';
-                if (containsPmetdec(curDecision))
-                    validityProblemString = validityProblemString + 'The selected process uses the Advanced \'execute only when changes are made\' checkbox in a decision, and Flow doesn\'t currently support that. \n';
-                System.debug ('current validity string is: ' + validityProblemString);
-    
-            }
-    
-            List<Dom.XmlNode> formulaNodes = XmlUtils.getChildrenByName(flowXml, 'formulas');
-            for (Dom.XMLNode curFormula : formulaNodes) {
-                Dom.XmlNode expressionNode = curFormula.getChildElement('expression', SOAP_NS);
-                if (expressionNode != null) {
-                    if (expressionNode.getText().contains('ISCHANGED')) {           
-                        validityProblemString = validityProblemString + 'The selected process uses ISCHANGED in a formula, and Flow doesn\'t currently support that. \n';
-                    }
-                    if (expressionNode.getText().contains('ISNEW')) {           
-                        validityProblemString = validityProblemString + 'The selected process uses ISNEW in a formula, and Flow doesn\'t currently support that. \n';
-                    }
-                    if (expressionNode.getText().contains('PRIORVALUE')) {           
-                        validityProblemString = validityProblemString + 'The selected process uses PRIORVALUE in a formula, and Flow doesn\'t currently support that. \n';
-                    }
-                    
-                }
-            }
-            
-                 */
-    
-             //   TODO: Fix This. It currently doesn\'t match
-            //Flow currently doesn't support related record traversals as part of record change -triggered Flows
-            //look for the pattern myVariable_current.foo.bar. if there are more than one period following myVariable_current, it's a hit
-            // First, instantiate a new Pattern object "MyPattern"
-            //this pattern looks for myVariable_current, followed by a period, then another word, then another period. However, it has an exception for when the following word is Owner or User because those can get autoconverted and used in Flow
-            
-           /*  String testpattern = '(myVariable_current\\.){1}(?!Owner.Id)(?!User.Id)\\w+\\.{1}';
-            String test2 = '(myVariable_current)';
-            Pattern MyPattern = Pattern.compile(test2);
-    
-            System.debug('flowmetadata is :' + wfrMetadata);
-            // Then instantiate a new Matcher object "MyMatcher"
-            Matcher MyMatcher = MyPattern.matcher(wfrMetadata);
-    
-            // You can use the system static method assert to verify the match
-            if(MyMatcher.matches() == true) {
-                System.debug('matcher matched');
-                validityProblemString = validityProblemString + ' The target process has a related record reference such as $Record.CreatedBy.ManagerId. Flow that use record-change triggers don\'t support those yet.';
-    
-            } else {
-                System.debug('matcher didnot match');
-            }
-    
-    
-    
-            return validityProblemString; */
         }
 
     public static Dom.XmlNode getRulesEntity (Dom.XmlNode wfrXML, String ruleName) {
@@ -116,14 +44,31 @@ public with sharing class ValidateWFRMetadata {
 
     public static Boolean hasTimeTriggers (Dom.XmlNode rulesEntity) {
         Boolean hasTimeTriggers = false;
+        if(rulesEntity.getChildElement('workflowTimeTriggers', SOAP_NS) != null) {
+            return true;
+        }
 
-        return hasTimeTriggers;
-
+        return false;
     }
 
     //some fieldUpdates use special types or formulas, and are not yet supported
     public static Boolean isValidFieldUpdate(String fieldUpdateName) {
         Boolean isValid = true;
+
+        for(Dom.XmlNode node : ValidateWFRMetadata.wfrMetadata.getChildren()) {
+            
+            if(node.getName() == 'fieldUpdates' && node.getChildElement('fullName', SOAP_NS).getText() == fieldUpdateName) {
+                System.debug('fieldupdate' + node.getChildElement('operation', SOAP_NS).getText());
+                if(
+                    (node.getChildElement('operation', SOAP_NS).getText() != 'Literal' && node.getChildElement('operation', SOAP_NS).getText()!= 'Null')
+                    ||
+                    (node.getChildElement('reevaluateOnChange', SOAP_NS) != null && node.getChildElement('reevaluateOnChange', SOAP_NS).getText() == 'true')
+                    ){
+                    isValid = false;
+                }
+                
+            }
+        }
         //if reevaluateOnChange entity exists and is true, reject with error
         //if operation entity is not ‘Literal’, reject with error
         
@@ -133,14 +78,15 @@ public with sharing class ValidateWFRMetadata {
     }
 
     public static String getActionType(Dom.XmlNode actionEntity) {
-
-        String type;
+        String type = actionEntity.getChildElement('type', SOAP_NS).getText();
+        System.debug('type ' + type);
         return type;
     }
 
     public static String getActionName(Dom.XmlNode actionEntity) {
 
-        String name;
+        String name = actionEntity.getChildElement('name', SOAP_NS).getText();
+
         return name;
     }
 
@@ -149,11 +95,13 @@ public with sharing class ValidateWFRMetadata {
         String name = getActionName(actionEntity);
         switch on type {
             when 'OutboundMessage', 'KnowledgePublish', 'Task', 'FlowAction' {
-                ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + ' /n This rule contains one of the following: OutboundMessage, Task, KnowledgePublish, FlowAction. Currently the converter doesn\'t support rules that have these. ';
+                ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + ' \n This rule contains one of the following: OutboundMessage, Task, KnowledgePublish, FlowAction. Currently the converter doesn\'t support rules that have these. ';
             }
-            when else {
+            when 'FieldUpdate' {
                 if (isValidFieldUpdate(name) == true) {
                     ValidateWFRMetadata.validFieldUpdateNames.add(name);
+                } else {
+                    ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + ' \n This rule has action with reevaluateOnChange = true or with action no Literal. ';
                 }
             }
         }
@@ -162,6 +110,11 @@ public with sharing class ValidateWFRMetadata {
     //a workflow metadata may have actions from more than 1 rule. Extract the ones from the rule that matters
     public static List<Dom.XmlNode> getRuleActions(Dom.XMLNode rulesEntity ) {
         List<Dom.XmlNode> curActions = new List<Dom.XmlNode>();
+        for(Dom.XmlNode node : rulesEntity.getChildren()) {
+            if(node.getName() == 'actions') {
+                curActions.add(node);
+            }
+        }
 
 
         return curActions;
@@ -181,5 +134,6 @@ public with sharing class ValidateWFRMetadata {
             return curName.contains('pmetdec') ? true : false;
     
         } */
+
     }
     

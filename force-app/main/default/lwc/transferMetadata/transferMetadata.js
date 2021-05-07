@@ -55,7 +55,6 @@ export default class TransferMetadata extends LightningElement {
     }
 
     retrieve() {
-        console.log('beginning retrieval of metadata name: ' + this.metadataName);
         requestMetadata({ metadataName : this.metadataName , metadataType : this.objectType})
         .then(result => {
             
