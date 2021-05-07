@@ -158,10 +158,13 @@ public with sharing class ModifyFlowMetadata {
             System.debug ('nextNodeName is: ' + nextNodeName);
             //find child of flowxml that has a child name element equal to this  generalize getChildProcessMetadataValueByName
             Dom.XmlNode targetNode = XmlUtils.getChildNodeByInternalName(flowXML, nextNodeName);
+            //if(targetNode != null) {
+                System.debug('targetNode' + targetNode);
             setXYPosition(targetNode,String.valueOf(xPosition), currentYPos);
             xPosition = xPosition + 150;
             //look in the node for another connector. if you find one, set nextNodeName equal to the new value, else set nextNodeName to null
             nextNodeName = findNextNodeName(targetNode);
+            //}
         } 
 
     }
@@ -225,7 +228,9 @@ public with sharing class ModifyFlowMetadata {
         startNode.addChildElement('locationY', SOAP_NS, null).addTextNode('43');
         startNode.addChildElement('connector', SOAP_NS, null).addChildElement('targetReference', SOAP_NS, null).addTextNode(startElementReference);
         startNode.addChildElement('object', SOAP_NS, null).addTextNode(contextObjectType);
-        startNode.addChildElement('recordTriggerType', SOAP_NS, null).addTextNode('Create');
+        startNode.addChildElement('recordTriggerType', SOAP_NS, null).addTextNode(
+            String.isEmpty(triggerType) ? 'Create' : triggerType == 'onAllChanges' ? 'CreateAndUpdate' : 'Create'
+            );
         startNode.addChildElement('triggerType', SOAP_NS, null).addTextNode('RecordAfterSave');
         
 
@@ -238,4 +243,3 @@ public with sharing class ModifyFlowMetadata {
     public class PBConvertException extends Exception{}
 
 }
-
