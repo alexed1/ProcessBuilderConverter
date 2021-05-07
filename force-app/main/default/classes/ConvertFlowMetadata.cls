@@ -10,15 +10,22 @@ public with sharing class ConvertFlowMetadata {
         String flowName;
 
         for (Requests req : requestList) {
-            System.debug('zip file text is:' + req.flowMetadataZipFile);
-            System.debug('flowname is:' + req.flowName);
+            //System.debug('zip file text is:' + req.flowMetadataZipFile);
+            //System.debug('flowname is:' + req.flowName);
 
             String flowmetadata = unpackZipfile( req.flowMetadataZipFile);
-            System.debug('initial retrieved unconverted pb metadata is: ' + flowmetadata);
+            Account a = new Account();
+            a.Id = '0019D00000G9thIQAR';
+            a.Test__c = flowmetadata;
+            update a;
+            //System.debug('initial retrieved unconverted pb metadata is: ' + flowmetadata);
             String validityProblemString = ValidateMetadata.validate (flowmetadata);
-            System.debug('validtyProblemString is: ' + validityProblemString);
+            //System.debug('validtyProblemString is: ' + validityProblemString);
             if(validityProblemString == '') {
                 String metadataText = convertMetadata(flowmetadata, req.flowName);
+                a.Id = '0019D00000G9thIQAR';
+                a.Test2__c = metadataText;
+                update a;
                 response.convertedFlowMetadata = metadataText;
             } else {
                 response.errors = validityProblemString;
@@ -60,6 +67,28 @@ public with sharing class ConvertFlowMetadata {
         System.debug('triggerType for flow: ' + flowName +' is: ' + triggerType); 
         String startElementReference = flowXML.getChildElement('startElementReference', SOAP_NS).getText();
         String newProcessType = 'AutolaunchedFlow';
+        System.debug('pmetdecRefName');
+        List<Dom.XmlNode> nodesToREmove = new List<Dom.XmlNode>();
+        List<Dom.XmlNode> decisionNodes = XmlUtils.getChildrenByName(flowXml, 'decisions');
+        for(Dom.XmlNode decision : decisionNodes) {
+            String refName = getDecisionRefName(decision);
+            System.debug('pmetdecRefName refname ' + refName);
+            if(refName != null && refName.contains('pmetdec')) {
+                Dom.XmlNode pmetdec = getDecisionByName(decisionNodes, refName);
+                String pmetdecRefName = getDecisionRefName(pmetdec);
+                System.debug('pmetdecRefName' + pmetdecRefName);
+                Dom.XmlNode parent = pmetdec.getParent();
+                System.debug('pmetdec' + pmetdec);
+                if(parent != null) {
+                    parent.removeChild(pmetdec);
+                }
+                setDecisionRefName(decision, pmetdecRefName);
+               // nodesToREmove.add(pmetdec);
+
+                
+                
+            }        
+        }
         
         flowXML = ModifyFlowMetadata.changeProcessType(flowXML, newProcessType);
         flowXML = ModifyFlowMetadata.setStatus(flowXML, 'Draft' );
@@ -76,10 +105,48 @@ public with sharing class ConvertFlowMetadata {
         String classText = doc.toXmlString();
         System.debug('===========');
         System.debug ('following all conversion, is: ' + classText);
-        //deployChangedMetadata(classText, flowName, null, 'Flow');         
+        //deployChangedMetadata(classText, flowName, null, 'Flow');    
+
         return classText;
             
     }
+
+    public static Dom.XmlNode getDecisionByName(List<Dom.XmlNode> decisionList, String name) {
+        for(Dom.XmlNode item : decisionList){
+            if(XmlUtils.getInternalName(item) == name) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    public static String getDecisionRefName(Dom.XmlNode decision) {
+        Dom.XmlNode rule = decision.getChildElement('rules', SOAP_NS);
+        if(rule != null) {
+            Dom.XmlNode connector = rule.getChildElement('connector', SOAP_NS);
+            Dom.XmlNode targetReference = connector.getChildElement('targetReference', SOAP_NS);
+            String refName = targetReference.getText();
+            if(refName != null) {
+                return refName;
+            }
+        }
+        return null;
+    }
+
+    public static Boolean setDecisionRefName(Dom.XmlNode decision, String refName) {
+        Dom.XmlNode rule = decision.getChildElement('rules', SOAP_NS);
+        if(rule != null) {
+            Dom.XmlNode connector = rule.getChildElement('connector', SOAP_NS);
+            Dom.XmlNode targetReference = connector.getChildElement('targetReference', SOAP_NS);
+            connector.removeChild(targetReference);
+            targetReference = connector.addChildElement('targetReference', SOAP_NS, null);
+            targetReference.addTextNode(refName);
+            Dom.XmlNode doesRequireRecordChangedToMeetCriteria = rule.addChildElement('doesRequireRecordChangedToMeetCriteria', SOAP_NS, null);
+            doesRequireRecordChangedToMeetCriteria.addTextNode('true');
+        }
+        return null;
+    }
+
  
 
     public static void deployChangedMetadata(String classText, String className, String testLevel, String objectType) {

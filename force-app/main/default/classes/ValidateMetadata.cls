@@ -11,9 +11,9 @@ public with sharing class ValidateMetadata {
 
 
         //Flow currently doesn't support Scheduled Actions as part of a record change-triggered Flow, so filter out flows with Pause element
-        Dom.XmlNode waitNodes = flowXML.getChildElement('waits', SOAP_NS);
-        if (waitNodes != null)
-            validityProblemString = validityProblemString + 'Triggers in Flow Builder do not currently support Scheduled Actions, and this Process Builder process has at least 1. \n';
+        //Dom.XmlNode waitNodes = flowXML.getChildElement('waits', SOAP_NS);
+        //if (waitNodes != null)
+        //    validityProblemString = validityProblemString + 'Triggers in Flow Builder do not currently support Scheduled Actions, and this Process Builder process has at least 1. \n';
 
 
         //Flow doesn't support IsChanged, IsNew, and PriorValue yet
@@ -28,8 +28,10 @@ public with sharing class ValidateMetadata {
         for (Dom.XMLNode curDecision : decisionNodes) {
             if (containsIsChangedInName(curDecision))
                 validityProblemString = validityProblemString + 'The selected process uses IsChanged operator, and Flow doesn\'t currently support that. \n';
-            if (containsPmetdec(curDecision))
-                validityProblemString = validityProblemString + 'The selected process uses the Advanced \'execute only when changes are made\' checkbox in a decision, and Flow doesn\'t currently support that. \n';
+            //if (containsPmetdec(curDecision)){
+                //System.debug('curDecision' + curDecision);
+                //validityProblemString = validityProblemString + 'The selected process uses the Advanced \'execute only when changes are made\' checkbox in a decision, and Flow doesn\'t currently support that. \n';
+            //}
             System.debug ('current validity string is: ' + validityProblemString);
 
         }
@@ -59,22 +61,22 @@ public with sharing class ValidateMetadata {
         // First, instantiate a new Pattern object "MyPattern"
         //this pattern looks for myVariable_current, followed by a period, then another word, then another period. However, it has an exception for when the following word is Owner or User because those can get autoconverted and used in Flow
         
-        String testpattern = '(myVariable_current\\.){1}(?!Owner.Id)(?!User.Id)\\w+\\.{1}';
-        String test2 = '(myVariable_current)';
-        Pattern MyPattern = Pattern.compile(test2);
+        //String testpattern = '(myVariable_current\\.){1}(?!Owner.Id)(?!User.Id)\\w+\\.{1}';
+        //String test2 = '(myVariable_current)';
+        //Pattern MyPattern = Pattern.compile(test2);
 
-        System.debug('flowmetadata is :' + flowMetadata);
+        //System.debug('flowmetadata is :' + flowMetadata);
         // Then instantiate a new Matcher object "MyMatcher"
-        Matcher MyMatcher = MyPattern.matcher(flowMetadata);
+        //Matcher MyMatcher = MyPattern.matcher(flowMetadata);
 
         // You can use the system static method assert to verify the match
-        if(MyMatcher.matches() == true) {
-            System.debug('matcher matched');
-            validityProblemString = validityProblemString + ' The target process has a related record reference such as $Record.CreatedBy.ManagerId. Flow that use record-change triggers don\'t support those yet.';
+        //if(MyMatcher.matches() == true) {
+        //    System.debug('matcher matched');
+        //    validityProblemString = validityProblemString + ' The target process has a related record reference such as $Record.CreatedBy.ManagerId. Flow that use record-change triggers don\'t support those yet.';
 
-        } else {
-            System.debug('matcher didnot match');
-        }
+        //} else {
+        //    System.debug('matcher didnot match');
+        //}
 
 
 
