@@ -73,7 +73,7 @@ RetrieveResult retrieveResult = metadataConnection.checkRetrieveStatus(response.
 
 
 
-        
+        metadataType = (metadataType == 'ProcessBuilder') ? 'Flow' : metadataType;
 		// Reset state from any previous requests
 		MetaDataRetrieveZip = null;
 		MetadataFiles = null;
@@ -90,12 +90,11 @@ RetrieveResult retrieveResult = metadataConnection.checkRetrieveStatus(response.
 		retrieveRequest.unpackaged = new MetadataService.Package_x();
 		retrieveRequest.unpackaged.types = new List<MetadataService.PackageTypeMembers>();
         MetadataService.PackageTypeMembers packageType = new MetadataService.PackageTypeMembers();
-        
         //Flow-specific code
 		packageType.name = metadataType; 
-		packageType.members = new String[] { metadataName };
+		List<string> splitedNameList = metadataName.split('\\.');
+		packageType.members = new String[] { splitedNameList.size() > 0 ? splitedNameList[0] : metadataName };
         retrieveRequest.unpackaged.types.add(packageType);
-        System.debug('retrieve request is: ' + retrieveRequest);
  
         
 

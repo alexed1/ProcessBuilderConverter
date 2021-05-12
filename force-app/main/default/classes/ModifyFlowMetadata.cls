@@ -105,7 +105,7 @@ public with sharing class ModifyFlowMetadata {
                             curDecisionNode = nextDecisionCandidate;
                         }
                     }
-                } else throw new PBConvertException('something went wrong. found a default connector in a decision element but didnt find a name value inside');
+                }else throw new PBConvertException('something went wrong. found a default connector in a decision element but didnt find a name value inside');
                 
             } else {
                 finished = true;
@@ -158,8 +158,10 @@ public with sharing class ModifyFlowMetadata {
             System.debug ('nextNodeName is: ' + nextNodeName);
             //find child of flowxml that has a child name element equal to this  generalize getChildProcessMetadataValueByName
             Dom.XmlNode targetNode = XmlUtils.getChildNodeByInternalName(flowXML, nextNodeName);
+            
             setXYPosition(targetNode,String.valueOf(xPosition), currentYPos);
             xPosition = xPosition + 150;
+            
             //look in the node for another connector. if you find one, set nextNodeName equal to the new value, else set nextNodeName to null
             nextNodeName = findNextNodeName(targetNode);
         } 
@@ -212,7 +214,7 @@ public with sharing class ModifyFlowMetadata {
         
     }
 
-    public static Dom.XmlNode addStartElement(Dom.XmlNode flowXML, String contextObjectType, String triggerType, String startElementReference) {
+    public static Dom.XmlNode addStartElement(Dom.XmlNode flowXML, String contextObjectType, String triggerType, String startElementReference, List<ConvertFlowMetadata.WaitElementsWrapper> elements) {
         DOM.Document doc = new DOM.Document();
         //String soapNS = 'http://schemas.xmlsoap.org/soap/envelope/';
         //dom.XmlNode startHolder = doc.createRootElement('startHolder', SOAP_NS, '');
@@ -221,11 +223,24 @@ public with sharing class ModifyFlowMetadata {
         flowXML.removeChild(oldStartReference);
         Dom.XmlNode startNode = flowXML.addChildElement('start', SOAP_NS, null);
         
+        
         startNode.addChildElement('locationX', SOAP_NS, null).addTextNode('43');
         startNode.addChildElement('locationY', SOAP_NS, null).addTextNode('43');
         startNode.addChildElement('connector', SOAP_NS, null).addChildElement('targetReference', SOAP_NS, null).addTextNode(startElementReference);
         startNode.addChildElement('object', SOAP_NS, null).addTextNode(contextObjectType);
-        startNode.addChildElement('recordTriggerType', SOAP_NS, null).addTextNode('Create');
+        startNode.addChildElement('recordTriggerType', SOAP_NS, null).addTextNode(
+            String.isEmpty(triggerType) ? 'Create' : triggerType == 'onAllChanges' ? 'CreateAndUpdate' : 'Create'
+            );
+            for(ConvertFlowMetadata.WaitElementsWrapper waitElements: elements){
+            Dom.XmlNode scheduledNode = startNode.addChildElement('scheduledPaths', SOAP_NS, null);
+            scheduledNode.addChildElement('name', SOAP_NS,null).addTextNode(waitElements.schName);
+            scheduledNode.addChildElement('connector', SOAP_NS, null).addChildElement('targetReference', SOAP_NS, null).addTextNode(waitElements.connector);
+            scheduledNode.addChildElement('label', SOAP_NS, null).addTextNode(waitElements.label);
+            scheduledNode.addChildElement('offsetNumber', SOAP_NS, null).addTextNode(waitElements.offsetNumber);
+            scheduledNode.addChildElement('offsetUnit', SOAP_NS, null).addTextNode(waitElements.offsetUnit);
+            scheduledNode.addChildElement('recordField', SOAP_NS, null).addTextNode(waitElements.recordField);
+            scheduledNode.addChildElement('timeSource', SOAP_NS, null).addTextNode('RecordField');
+            }
         startNode.addChildElement('triggerType', SOAP_NS, null).addTextNode('RecordAfterSave');
         
 
@@ -238,4 +253,3 @@ public with sharing class ModifyFlowMetadata {
     public class PBConvertException extends Exception{}
 
 }
-
