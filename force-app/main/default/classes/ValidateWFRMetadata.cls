@@ -28,7 +28,6 @@ public with sharing class ValidateWFRMetadata {
 
             //get and validate the corresponding action entities
             List<Dom.XmlNode> actionEntities = getRuleActions(rulesEntity);
-            System.debug('actionEntities'  + actionEntities.size() + actionEntities);
             for(Dom.XmlNode actionEntity : actionEntities) {
                 validateActionEntity(actionEntity);
             }

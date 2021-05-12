@@ -120,7 +120,6 @@ public with sharing class ModifyFlowMetadata {
         Dom.XmlNode nodeConnectorElement = curNode.getChildElement('connector', SOAP_NS);
         if (nodeConnectorElement != null ) {
             String nodeConnectorTargetReferenceElementText = nodeConnectorElement.getChildElement('targetReference', SOAP_NS).getText();
-            System.debug('nodeConnectorTargetReferenceElementText '+nodeConnectorTargetReferenceElementText);
             if (nodeConnectorTargetReferenceElementText != null) {
                 return nodeConnectorTargetReferenceElementText;
             }

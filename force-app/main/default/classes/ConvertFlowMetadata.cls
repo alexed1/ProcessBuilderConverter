@@ -67,9 +67,7 @@ public with sharing class ConvertFlowMetadata {
             if(refName != null && refName.contains('pmetdec')) {
                 Dom.XmlNode pmetdec = getDecisionByName(decisionNodes, refName);
                 String pmetdecRefName = getDecisionRefName(pmetdec);
-                System.debug('pmetdecRefName' + pmetdecRefName);
                 Dom.XmlNode parent = pmetdec.getParent();
-                System.debug('pmetdec' + pmetdec);
                 if(parent != null) {
                     parent.removeChild(pmetdec);
                 }
@@ -112,9 +110,7 @@ public with sharing class ConvertFlowMetadata {
             }
             waitElWr.add(newWaiwr);
         }
-        System.debug('List result'+ waitElWr);
         for(WaitElementsWrapper elementName:waitElWr){
-        // checkCondition(flowXML);
         removeWaitsElements(flowXML);
         removeWaitRefName(flowXML,elementName.schName);
         }
@@ -178,7 +174,6 @@ public with sharing class ConvertFlowMetadata {
     }
 
     public static Dom.XmlNode checkCondition(Dom.XMLNode flowXML){
-        //List<Dom.XmlNode> conditionElements = new List<Dom.XmlNode>();
         List<Dom.XmlNode> allElements = flowXML.getChildren();
         Map<String,Dom.XmlNode> conditionElements = new Map<String,Dom.XmlNode>();
         for(Dom.XmlNode conditions:allElements){
@@ -195,7 +190,6 @@ public with sharing class ConvertFlowMetadata {
                 if(name.getText().contains('myPostWaitDecision')){
                     String nameOfWair = name.getText().replace('myPostWaitDecision_myWaitEvent_','');
                     String nameForCheckCond = nameOfWair.replace('_event_0','');
-                    system.debug('nameOfWairDes '+nameForCheckCond);
                     Dom.XmlNode checkCond = conditions.getChildElement('rules', SOAP_NS);
                     Dom.XmlNode condit = checkCond.getChildElement('conditions', SOAP_NS);
                     if(condit != null){

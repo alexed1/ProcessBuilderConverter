@@ -17,10 +17,8 @@ public with sharing class ConvertWFRMetadata {
 
     @InvocableMethod
     public static List <Results> convert(List<Requests> requestList) {
-        //try {System.debug('entering invocable method ConvertWFRMetadata.convert');
         Results response = new Results();
         List<Results> responseWrapper = new List<Results>();
-        //String flowName;
 
         for (Requests req : requestList) {
 
@@ -100,7 +98,6 @@ public with sharing class ConvertWFRMetadata {
         } else if(triggerType == 'onCreateOrTriggeringUpdate') {
             flowTriggerType ='CreateAndUpdate';
             doesRequireRecordChangedToMeetCriteria = true;
-            //startElement.addChildElement('doesRequireRecordChangedToMeetCriteria', SOAP_NS, null).addTextNode('true');
         }
         startElement.addChildElement('recordTriggerType', SOAP_NS, null).addTextNode(
             flowTriggerType
@@ -108,8 +105,7 @@ public with sharing class ConvertWFRMetadata {
         Dom.XmlNode decision = createDecision(flowXML, wfrRule, objectName, doesRequireRecordChangedToMeetCriteria);
 
         
-        
-        //wrfRule.getChildElement(name, namespace);
+
         List<Dom.XmlNode> actionList = new List<Dom.XmlNode>();
         List<Dom.XmlNode> ruleActionList = ValidateWFRMetadata.getRuleActions(wfrRule);
         Integer alertCount = 1;
@@ -135,10 +131,6 @@ public with sharing class ConvertWFRMetadata {
 
             }
 
-            
-            
-
-            //ModifyFlowMetadata.repositionElements(doc);
         }
 
         if(actionList.size() > 0) {
