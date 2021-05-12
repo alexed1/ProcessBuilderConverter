@@ -10,13 +10,13 @@ public with sharing class ConvertFlowMetadata {
         String flowName;
 
         for (Requests req : requestList) {
-            //System.debug('zip file text is:' + req.flowMetadataZipFile);
-            //System.debug('flowname is:' + req.flowName);
+            System.debug('zip file text is:' + req.flowMetadataZipFile);
+            System.debug('flowname is:' + req.flowName);
 
             String flowmetadata = unpackZipfile( req.flowMetadataZipFile);
-            //System.debug('initial retrieved unconverted pb metadata is: ' + flowmetadata);
+            System.debug('initial retrieved unconverted pb metadata is: ' + flowmetadata);
             String validityProblemString = ValidateMetadata.validate (flowmetadata);
-            //System.debug('validtyProblemString is: ' + validityProblemString);
+            System.debug('validtyProblemString is: ' + validityProblemString);
             if(validityProblemString == '') {
                 String metadataText = convertMetadata(flowmetadata, req.flowName);
                 response.convertedFlowMetadata = metadataText;
