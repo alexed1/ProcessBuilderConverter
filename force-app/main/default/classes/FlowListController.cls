@@ -63,6 +63,7 @@ global with sharing class FlowListController {
         queries.add(queryWorkflow);     
            
         MetadataService.FileProperties[] fileProperties = service.listMetadata(queries, 25);
+        System.debug('fileProperties is: ' + fileProperties);
         for(MetadataService.FileProperties fileProperty : fileProperties){
             String curWFRdef =  fileProperty.fullName;
             System.debug(fileProperty.fullName);

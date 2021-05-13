@@ -94,7 +94,7 @@ public with sharing class ValidateWFRMetadata {
         String name = getActionName(actionEntity);
         switch on type {
             when 'OutboundMessage', 'KnowledgePublish', 'Task', 'FlowAction' {
-                ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + ' \n This rule contains one of the following: OutboundMessage, Task, KnowledgePublish, FlowAction. Currently the converter doesn\'t support rules that have these. ';
+                ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + ' \n The selected Workflow Rule contains one of the following unsupported actions: OutboundMessage, Task, KnowledgePublish, FlowAction. Currently the converter only works with rules that have Update Fields and/or Email Alerts. ';
             }
             when 'FieldUpdate' {
                 if (isValidFieldUpdate(name) == true) {

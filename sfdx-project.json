@@ -10,7 +10,7 @@
     ],
     "namespace": "",
     "sfdcLoginUrl": "https://login.salesforce.com",
-    "sourceApiVersion": "49.0",
+    "sourceApiVersion": "51.0",
     "packageAliases": {
         "pbconvert": "0HoB0000000Cb2yKAC",
         "pbconvert@1.0.0-0": "04tB0000000P0GVIA0",

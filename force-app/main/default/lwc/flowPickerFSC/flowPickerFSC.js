@@ -19,8 +19,9 @@ export default class flowPickerFSC extends LightningElement {
     @wire(getFlowNamesApex, {filtersString: '$filters'})
     _getFlowNamesApex({error, data}) {
     if (error) {
-            console.log(error.body.message);
+            console.log('error returning from getFlowNamesApex' + error.body.message);
         } else if (data) {
+            console.log('returning from getFlowNamesApex with: ' + JSON.stringify(data));
             this.flowDefinitions = data;
         }
     }
@@ -28,7 +29,9 @@ export default class flowPickerFSC extends LightningElement {
     @wire(getWFRDataApex, {})
     _getWFRDataApex({error, data}) {
     if (error) {
-            console.log(error.body.message);
+            let errortext = 'error returning from _getWFRDataApex' + error.body.message;
+            console.log(errortext);
+            throw new Error(errortext);
         } else if (data) {
             this.wfrDefinitions = data;
             console.log('got back data from WFR call: ' + JSON.stringify(data));
@@ -58,14 +61,14 @@ export default class flowPickerFSC extends LightningElement {
     }
 
     get options() {
-        if(this.showWhichFlowTypes == 'Workflow' && this.wfrDefinitions) {
+        if(this.showWhichFlowTypes == 'WorkflowRules' && this.wfrDefinitions) {
             return this.wfrDefinitions.map(curFD => {
                 return {
                     value: curFD,
                     label: curFD
                 }
             });
-        } else if (this.flowDefinitions && this.showWhichFlowTypes != 'Workflow') {
+        } else if (this.flowDefinitions && this.showWhichFlowTypes != 'WorkflowRules') {
            
             return this.flowDefinitions.map(curFD => {
                 return {
