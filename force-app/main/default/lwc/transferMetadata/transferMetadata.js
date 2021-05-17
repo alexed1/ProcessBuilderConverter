@@ -22,7 +22,6 @@ export default class TransferMetadata extends LightningElement {
     @api transferMode;
     @api metadataString;
     @api objectType;
-    @api targetObject;
     modifiedName;
 
     //@wire(getFileNames ,{ zipfile : '$zipFileString'})

@@ -18,8 +18,7 @@
             <property name="required" type="Boolean" role="inputOnly" label="Required?" description="If set to True, an error message will appear when trying to advance to the next screen. (default=False)"/>
             <property name="searchString" type="String" role="inputOnly" label="Flow Name Filter" description="Set a value to search and filter the returned list of Flows.  This adds a LIKE %filtertext% to the Flow lookup."/>
             <property name="componentWidth" type="String" role="inputOnly" label="Set component width (out of 12)" default="12" description="By dividing the full display area width into 12 equal sections, you can specify the percentage of the total width to be used by this component in 12ths.  
-            For example a value of 9 would be 75% width, 6 would be 50% width, 3 would be 25% width."/>
-            <property name="targetObject" type="String" role="inputOnly" default="WFR" label="Target Object Name" description="Specify Flow or WFR (Workflow Rules)"/>
+            For example a value of 9 would be 75% width, 6 would be 50% width, 3 would be 25% width."/>    
 
         </targetConfig>
         <targetConfig targets="lightning__RecordPage">
