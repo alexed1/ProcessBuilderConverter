@@ -15,6 +15,19 @@ public with sharing class ConvertWFRMetadata {
 
     };
 
+    final static Map<String, string> FORMULA_TYPE_MAP = new Map<String, String>{
+        'BOOLEAN'  => 'Boolean',
+        'CURRENCY' =>'Currency',
+        'DATE' =>'Date',
+        'DATETIME' =>'DateTime',
+        'DOUBLE' =>'Number',
+        'INTEGER' =>'Number',
+        'LONG' =>'Number',
+        'PERCENT' =>'Number'
+    };
+
+    static List<DescribeFieldResult> sObjectFieldList;
+
     @InvocableMethod
     public static List <Results> convert(List<Requests> requestList) {
         Results response = new Results();
@@ -23,7 +36,6 @@ public with sharing class ConvertWFRMetadata {
         for (Requests req : requestList) {
 
             String wfrmetadata = unpackZipfile( req.wfrMetadataZipFile);
-
 
 
             Dom.Document doc = new Dom.Document();
@@ -79,6 +91,7 @@ public with sharing class ConvertWFRMetadata {
             '</start>'+
             //'<status>Active</status>' +
         '</Flow>';
+        ConvertWFRMetadata.sObjectFieldList = getFields(objectName);
         String ruleName = wfrName.split('\\.')[1];
         Dom.Document doc = new Dom.Document();
         doc.load(boilerplate);
@@ -129,6 +142,22 @@ public with sharing class ConvertWFRMetadata {
                     actionList.add(convertedAlert);
                 }
 
+            }
+
+        }
+
+        for(Dom.XmlNode action : ruleActionList) {
+            String actionType = ValidateWFRMetadata.getActionType(action);
+            String actionName = ValidateWFRMetadata.getActionName(action);
+            if(actionType == 'FieldUpdate') {
+                
+                Dom.XmlNode actionEntity = getAction(wfrXML,actionName);
+                Dom.XmlNode convertedFlowAction = addFormulaForFieldUpdate(actionEntity, flowXML, objectName);
+                if(convertedFlowAction != null) {
+                    actionList.add(convertedFlowAction);
+                }
+
+            
             }
 
         }
@@ -204,7 +233,14 @@ public with sharing class ConvertWFRMetadata {
         Dom.XmlNode inputAssignments =  recordUpdate.addChildElement('inputAssignments', SOAP_NS, null);
         inputAssignments.addChildElement('field', SOAP_NS, null).addTextNode(field);
         String operation = actionEntity.getChildElement('operation', SOAP_NS).getText();
-        if(operation != 'Null') {
+
+        if(operation == 'Formula') {
+            
+            Dom.XmlNode valueXML = actionEntity.getChildElement('formula', SOAP_NS);
+            if(valueXML != null) {
+                inputAssignments.addChildElement('value', SOAP_NS, null).addChildElement('elementReference', SOAP_NS, null).addTextNode(actionName + '_formula');
+            }
+        } else if(operation != 'Null') {
             Dom.XmlNode valueXML = actionEntity.getChildElement('literalValue', SOAP_NS);
             if(valueXML != null) {
                 inputAssignments.addChildElement('value', SOAP_NS, null).addChildElement('stringValue', SOAP_NS, null).addTextNode(valueXML.getText());
@@ -212,6 +248,40 @@ public with sharing class ConvertWFRMetadata {
         }
 
         return recordUpdate;
+    }
+
+    public static Dom.XmlNode addFormulaForFieldUpdate(Dom.XmlNode actionEntity, Dom.XmlNode flowXML, String objectName) {
+        String actionName = actionEntity.getChildElement('fullName', SOAP_NS).getText();
+        String actionLabel = actionEntity.getChildElement('name', SOAP_NS).getText();
+        String fieldName = actionEntity.getChildElement('field', SOAP_NS).getText();
+        String operation = actionEntity.getChildElement('operation', SOAP_NS).getText();
+        String fieldType = getFieldType(fieldName);
+        System.debug('fieldType ' + fieldType);
+        System.debug('fieldType ' + FORMULA_TYPE_MAP.get(fieldType));
+        String formulaType = FORMULA_TYPE_MAP.get(fieldType);
+
+        if(operation == 'Formula') {
+            
+            Dom.XmlNode valueXML = actionEntity.getChildElement('formula', SOAP_NS);
+            if(valueXML != null) {
+                String value = valueXML.getText();
+                System.debug('fields + ' + ConvertWFRMetadata.sObjectFieldList);
+                for(DescribeFieldResult field : ConvertWFRMetadata.sObjectFieldList) {
+                    if(value.contains(field.getName())) {
+                        value = value.replaceAll(''+ field.getName() +'(?!")', '{! \\$Record.' + field.getName() + '}');
+
+                        System.debug(value);
+                    }
+                }
+                Dom.XmlNode formulaNode = flowXML.addChildElement('formulas', SOAP_NS, null);
+                formulaNode.addChildElement('name', SOAP_NS, null).addTextNode(actionName + '_formula');
+                formulaNode.addChildElement('dataType', SOAP_NS, null).addTextNode(formulaType == null ? 'String' : formulaType);
+                formulaNode.addChildElement('expression', SOAP_NS, null).addTextNode(value);
+                
+            }
+        }
+
+        return null;
     }
 
     public static Dom.XmlNode generateEmailAlert(Dom.XmlNode actionEntity, Dom.XmlNode flowXML, String objectName, String alertName) {
@@ -252,7 +322,7 @@ public with sharing class ConvertWFRMetadata {
         if(doesRequireRecordChangedToMeetCriteria) {
             rules.addChildElement('doesRequireRecordChangedToMeetCriteria', SOAP_NS, null).addTextNode('true');
         }
-        //<booleanFilter>1 AND 2 AND 3 AND 4 AND 5 AND 6 AND 7 AND 8 AND 9</booleanFilter>
+
         Dom.XmlNode booleanFilter = wfrRule.getChildElement('booleanFilter', SOAP_NS);
         if(booleanFilter != null) {
             rules.addChildElement('conditionLogic', SOAP_NS, null).addTextNode(booleanFilter.getText());
@@ -289,6 +359,32 @@ public with sharing class ConvertWFRMetadata {
         }
 
         return decision;
+    }
+
+    public static List<DescribeFieldResult> getFields(String selectedObject){
+        List<DescribeFieldResult> reqFields = new List<DescribeFieldResult>();
+        Map <String,Schema.SObjectType> gd = Schema.getGlobalDescribe();
+        Schema.SObjectType sobjType = gd.get(selectedObject);
+        Schema.DescribeSObjectResult r = sobjType.getDescribe();
+        Map<String, Schema.SObjectField> MapofField = r.fields.getMap();
+        
+        for(String fieldName : MapofField.keySet()) {
+            Schema.SObjectField field = MapofField.get(fieldName);
+            Schema.DescribeFieldResult F = field.getDescribe();
+            System.debug('field-->'+F.getName());    System.debug('F-->'+F.getType() + 'of field');
+	    reqFields.add(F);
+        }
+        System.debug(reqFields);
+        return reqFields;
+    }
+
+    public static String getFieldType(String fieldName) {
+        for(DescribeFieldResult field : ConvertWFRMetadata.sObjectFieldList) {
+            if(field.getName() == fieldName) {
+                return field.getType().name();
+            }
+        }
+        return null;
     }
 
  
