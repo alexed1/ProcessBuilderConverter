@@ -37,6 +37,22 @@ public with sharing class ValidateMetadata {
                 }
             }
         }
+        List<Dom.XmlNode> waitEventsNodes = flowXML.getChildElements();
+        //Integer waitCounter = 0;
+        for(Dom.XmlNode waits:waitEventsNodes){
+            if(waits.getName() == 'waits'){
+                Integer waitCounter = 0;
+                for(Dom.XmlNode waitsEvent:waits.getChildElements()){
+                    if(waitsEvent.getName() =='waitEvents'){
+                        waitCounter++;
+                    }
+                }
+                
+            if(waitCounter>1){
+                validityProblemString = validityProblemString + 'There cannot be more than one Scheduled action related to one criteria . \n';
+            }
+            }
+        }
         return validityProblemString;
     }
 
