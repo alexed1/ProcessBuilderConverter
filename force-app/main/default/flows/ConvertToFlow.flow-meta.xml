@@ -422,12 +422,6 @@
                     <booleanValue>true</booleanValue>
                 </value>
             </inputParameters>
-            <inputParameters>
-                <name>targetObject</name>
-                <value>
-                    <stringValue>Flow</stringValue>
-                </value>
-            </inputParameters>
             <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>true</isRequired>
             <storeOutputAutomatically>true</storeOutputAutomatically>
