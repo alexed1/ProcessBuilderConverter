@@ -71,10 +71,6 @@ public with sharing class ConvertFlowMetadata {
                     parent.removeChild(pmetdec);
                 }
                 setDecisionRefName(decision, pmetdecRefName);
-               // nodesToREmove.add(pmetdec);
-
-                
-                
             }        
         }
         
@@ -330,7 +326,6 @@ public with sharing class ConvertFlowMetadata {
                 Dom.XmlNode refForUpdateRec = assigmentRef.getChildElement('connector', SOAP_NS);
                 if(refForUpdateRec != null){
                     String targRefName = refForUpdateRec.getChildElement('targetReference', SOAP_NS).getText();
-                    system.debug('refname '+targRefName);
                     if(targRefName.contains('Assignment')){
                         refForUpdateRec.getParent().removeChild(refForUpdateRec);
                     }
@@ -340,7 +335,6 @@ public with sharing class ConvertFlowMetadata {
                 Dom.XmlNode refToRecordCreate = assigmentRef.getChildElement('connector', SOAP_NS);
                 if(refToRecordCreate != null){
                     String targRefName = refToRecordCreate.getChildElement('targetReference', SOAP_NS).getText();
-                    system.debug('refname '+targRefName);
                     if(targRefName.contains('Assignment')){
                         refToRecordCreate.getParent().removeChild(refToRecordCreate);
                     }

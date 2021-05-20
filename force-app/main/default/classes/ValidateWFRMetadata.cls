@@ -26,8 +26,7 @@ public with sharing class ValidateWFRMetadata {
         public static string validateRule(Dom.XMLNode wfrXML, String ruleName) {
 
             ValidateWFRMetadata.ruleName = ruleName;
-            ValidateWFRMetadata.wfrMetadata = wfrXML;
-            //Retrieve the root element for this document.               
+            ValidateWFRMetadata.wfrMetadata = wfrXML;               
 
             //get the matching rules entity. The other ones won't be used
             Dom.XMLNode rulesEntity = getRulesEntity(wfrXML, ruleName.split('\\.')[1]);
@@ -82,10 +81,7 @@ public with sharing class ValidateWFRMetadata {
                 
             }
         }
-        //if reevaluateOnChange entity exists and is true, reject with error
-        //if operation entity is not ‘Literal’, reject with error
         
-
         return isValid;
 
     }

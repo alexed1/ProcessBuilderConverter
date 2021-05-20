@@ -20,7 +20,6 @@ export default class flowPickerFSC extends LightningElement {
     if (error) {
             console.log('error returning from getFlowNamesApex' + error.body.message);
         } else if (data) {
-            console.log('returning from getFlowNamesApex with: ' + JSON.stringify(data));
             this.flowDefinitions = data;
         }
     }
