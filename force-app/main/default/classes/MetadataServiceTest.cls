@@ -132,10 +132,36 @@ private class MetadataServiceTest
     private static void coverGeneratedCodeTypes()
     {    	       
         // Reference types
+        // Reference types
         Test.startTest();
         new MetadataService();
         new MetadataService.listMetadataResponse_element();
         new MetadataService.WorkflowRule();
+        new MetadataService.PermissionSetGroup();
+        new MetadataService.FlowInputValidationRuleTranslation();
+        new MetadataService.CommunityTemplateDefinition();
+        new MetadataService.FlowScreenFieldOutputParameter();
+        new MetadataService.EclairMap();
+        new MetadataService.FieldServiceSettings();
+        new MetadataService.ProfilePasswordPolicy();
+        new MetadataService.WaveXmdDimension();
+        new MetadataService.WaveXmdDate();
+        new MetadataService.WaveXmdMeasure();
+        new MetadataService.ChatterExtension();
+        new MetadataService.WaveXmd();
+        new MetadataService.AppPreferences();
+        new MetadataService.CleanRule();
+        new MetadataService.RecommendationDefinitionDetail();
+        new MetadataService.CampaignInfluenceModel();
+        new MetadataService.IntegrationHubSettingsType();
+        new MetadataService.IntegrationHubSettings();
+        new MetadataService.FlowCategory();
+        new MetadataService.LightningBolt();
+        new MetadataService.OrchestrationContext();
+        new MetadataService.CaseSubjectParticle();
+        new MetadataService.WaveXmdDimensionMember();
+        new MetadataService.EmailServicesFunction();
+        new MetadataService.ScheduledRecommendationDetail();
         new MetadataService.RecordTypeTranslation();
         new MetadataService.checkDeployStatus_element();
         new MetadataService.CodeCoverageWarning();
@@ -151,9 +177,28 @@ private class MetadataServiceTest
         new MetadataService.DescribeMetadataResult();
         new MetadataService.RecordType();
         new MetadataService.Scontrol();
+        new MetadataService.LightningBoltFeatures();
+        new MetadataService.NetworkBranding();
+        new MetadataService.UserCriteria();
+        new MetadataService.LightningExperienceTheme();
+        new MetadataService.ProfileCategoryGroupVisibility();
+        new MetadataService.CleanDataService();
+        new MetadataService.SocialCustomerServiceSettings();
+        new MetadataService.EmbeddedServiceQuickAction();
+        new MetadataService.FlowDefinitionTranslation();
+        new MetadataService.StrategyNode();
+        new MetadataService.FlowScreenTranslation();
+        new MetadataService.CommunityRoles();
+        new MetadataService.DashboardFlexTableComponentProperties();
+        new MetadataService.CommunityThemeSetting();   
         new MetadataService.DashboardComponent();
         new MetadataService.FilterItem();
         new MetadataService.Profile();
+        new MetadataService.EclairGeoData();
+        new MetadataService.CommunityCustomThemeLayoutType();
+        new MetadataService.CommunityTemplatePageSetting();
+        new MetadataService.TopicsForObjects();
+        new MetadataService.FlowChoiceUserInputTranslation();  
         new MetadataService.ReportFilter();
         new MetadataService.PermissionSetApexClassAccess();
         new MetadataService.LogInfo();
