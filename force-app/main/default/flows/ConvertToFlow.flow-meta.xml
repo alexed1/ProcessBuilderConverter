@@ -20,7 +20,7 @@
         <inputParameters>
             <name>flowName</name>
             <value>
-                <elementReference>transferMetadataFlow.metadataName</elementReference>
+                <elementReference>targetPicker.selectedFlowApiName</elementReference>
             </value>
         </inputParameters>
         <storeOutputAutomatically>true</storeOutputAutomatically>
@@ -45,7 +45,7 @@
         <inputParameters>
             <name>wfrName</name>
             <value>
-                <elementReference>retrieval.metadataName</elementReference>
+                <elementReference>targetPicker.selectedFlowApiName</elementReference>
             </value>
         </inputParameters>
         <storeOutputAutomatically>true</storeOutputAutomatically>
@@ -282,7 +282,7 @@
         </fields>
         <fields>
             <name>deployFlow</name>
-            <extensionName>c:transferMetadata</extensionName>
+            <extensionName>c:fsc_transferMetadata</extensionName>
             <fieldType>ComponentInstance</fieldType>
             <inputParameters>
                 <name>transferMode</name>
@@ -328,7 +328,7 @@
         </connector>
         <fields>
             <name>transferMetadataFlow</name>
-            <extensionName>c:transferMetadata</extensionName>
+            <extensionName>c:fsc_transferMetadata</extensionName>
             <fieldType>ComponentInstance</fieldType>
             <inputParameters>
                 <name>metadataName</name>
@@ -368,7 +368,7 @@
         </connector>
         <fields>
             <name>retrieval</name>
-            <extensionName>c:transferMetadata</extensionName>
+            <extensionName>c:fsc_transferMetadata</extensionName>
             <fieldType>ComponentInstance</fieldType>
             <inputParameters>
                 <name>metadataName</name>

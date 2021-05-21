@@ -55,16 +55,19 @@ global with sharing class FlowListController {
     public static List<String> getWFRDataApex() {
         List<String> curWFRNames = new List<String>();
         System.debug('entering getWFRDataApex');
-        MetadataService.MetadataPort service = RetrieveMetadata.createService();				
-          
-        List<MetadataService.ListMetadataQuery> queries = new List<MetadataService.ListMetadataQuery>();        
-        MetadataService.ListMetadataQuery queryWorkflow = new MetadataService.ListMetadataQuery();
+  		
+        usf.MetadataService.MetadataPort service = new usf.MetadataService.MetadataPort();
+		service.SessionHeader = new usf.MetadataService.SessionHeader_element();
+		service.SessionHeader.sessionId = UserInfo.getSessionId();
+
+        List<usf.MetadataService.ListMetadataQuery> queries = new List<usf.MetadataService.ListMetadataQuery>();        
+        usf.MetadataService.ListMetadataQuery queryWorkflow = new usf.MetadataService.ListMetadataQuery();
         queryWorkflow.type_x = 'WorkflowRule';
         queries.add(queryWorkflow);     
            
-        MetadataService.FileProperties[] fileProperties = service.listMetadata(queries, 25);
+        usf.MetadataService.FileProperties[] fileProperties = service.listMetadata(queries, 25);
         System.debug('fileProperties is: ' + fileProperties);
-        for(MetadataService.FileProperties fileProperty : fileProperties){
+        for(usf.MetadataService.FileProperties fileProperty : fileProperties){
             String curWFRdef =  fileProperty.fullName;
             System.debug(fileProperty.fullName);
             curWFRNames.add(curWFRdef);

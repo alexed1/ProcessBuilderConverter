@@ -60,7 +60,7 @@ public with sharing class ConvertWFRMetadata {
 
              
         Blob zipBlob = EncodingUtil.base64Decode(metadataZipfile);
-        Zippex curZippex = new Zippex(zipBlob);
+        usf.Zippex curZippex = new usf.Zippex(zipBlob);
         Set<String> fileNames = curZippex.getFileNames();
         System.debug('filenames are: ' + fileNames);
      
