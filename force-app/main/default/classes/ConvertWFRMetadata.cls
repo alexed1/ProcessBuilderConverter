@@ -185,7 +185,7 @@ public with sharing class ConvertWFRMetadata {
             }
         }
     
-
+        addConversionLog(flowXML);
        
 
         String classText = doc.toXmlString();
@@ -212,6 +212,15 @@ public with sharing class ConvertWFRMetadata {
             
         }
 
+        return null;
+    }
+    public static Dom.XmlNode addConversionLog(Dom.XmlNode flowXML){
+        Dom.XmlNode processMetadata = flowXML.addChildElement('processMetadataValues', SOAP_NS, null);
+            if(processMetadata != null){
+            processMetadata.addChildElement('name', SOAP_NS, null).addTextNode('ConversionLog');
+            Dom.XmlNode value = processMetadata.addChildElement('value', SOAP_NS, null);
+            value.addChildElement('stringValue', SOAP_NS, null).addTextNode('ConvertedByConvertToFlow');
+            }
         return null;
     }
     public static Dom.XmlNode convertFieldUpdateAction(Dom.XmlNode actionEntity, Dom.XmlNode flowXML, String objectName) {

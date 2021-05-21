@@ -114,6 +114,7 @@ public with sharing class ConvertFlowMetadata {
         checkCondition(flowXML);
         getExpression(flowXML);
         enableAutoLayout(flowXML);
+        addConversionLog(flowXML);
         flowXML = ModifyFlowMetadata.changeProcessType(flowXML, newProcessType);
         flowXML = ModifyFlowMetadata.setStatus(flowXML, 'Draft' );
         flowXML = ModifyFlowMetadata.addStartElement(flowXML, contextObjectType, triggerType, startElementReference, waitElWr);
@@ -342,6 +343,16 @@ public with sharing class ConvertFlowMetadata {
             }
 
         }
+        return null;
+    }
+
+    public static Dom.XmlNode addConversionLog(Dom.XmlNode flowXML){
+        Dom.XmlNode processMetadata = flowXML.addChildElement('processMetadataValues', SOAP_NS, null);
+            if(processMetadata != null){
+            processMetadata.addChildElement('name', SOAP_NS, null).addTextNode('ConversionLog');
+            Dom.XmlNode value = processMetadata.addChildElement('value', SOAP_NS, null);
+            value.addChildElement('stringValue', SOAP_NS, null).addTextNode('ConvertedByConvertToFlow');
+            }
         return null;
     }
 
