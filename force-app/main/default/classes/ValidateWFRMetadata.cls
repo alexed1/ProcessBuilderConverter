@@ -8,13 +8,25 @@ public with sharing class ValidateWFRMetadata {
         public static String validityProblemString = '';
         public static List<String> validFieldUpdateNames = new List<String>();
 
-        
+        static final List<String> unsupportedFormulaList = new List<String> {
+            'GETRECORDIDS',
+            'IMAGE',
+            'INCLUDE',
+            'ISCHANGED',
+            'ISNEW',
+            'PARENTGROUPVAL',
+            'PREVGROUPVAL',
+            'PRIORVALUE',
+            'REQUIRE SCRIPT',
+            'TIMENOW',
+            'TIMEVALUE',
+            'VLOOKUP'
+        };
 
         public static string validateRule(Dom.XMLNode wfrXML, String ruleName) {
 
             ValidateWFRMetadata.ruleName = ruleName;
-            ValidateWFRMetadata.wfrMetadata = wfrXML;
-            //Retrieve the root element for this document.               
+            ValidateWFRMetadata.wfrMetadata = wfrXML;               
 
             //get the matching rules entity. The other ones won't be used
             Dom.XMLNode rulesEntity = getRulesEntity(wfrXML, ruleName.split('\\.')[1]);
@@ -36,6 +48,7 @@ public with sharing class ValidateWFRMetadata {
         }
 
     public static Dom.XmlNode getRulesEntity (Dom.XmlNode wfrXML, String ruleName) {
+        System.debug('ruleName ' + ruleName);
         Dom.XmlNode curRule = XmlUtils.getChildNodeByName(wfrXML, 'fullName',  'rules',  ruleName);
         return curRule;
 
@@ -57,23 +70,35 @@ public with sharing class ValidateWFRMetadata {
         for(Dom.XmlNode node : ValidateWFRMetadata.wfrMetadata.getChildren()) {
             
             if(node.getName() == 'fieldUpdates' && node.getChildElement('fullName', SOAP_NS).getText() == fieldUpdateName) {
-                System.debug('fieldupdate' + node.getChildElement('operation', SOAP_NS).getText());
-                if(
-                    (node.getChildElement('operation', SOAP_NS).getText() != 'Literal' && node.getChildElement('operation', SOAP_NS).getText()!= 'Null')
-                    ||
-                    (node.getChildElement('reevaluateOnChange', SOAP_NS) != null && node.getChildElement('reevaluateOnChange', SOAP_NS).getText() == 'true')
-                    ){
+                String operation = node.getChildElement('operation', SOAP_NS).getText();
+                if(( operation == 'Formula' && !isSupportedFormula(node))){
+                    ValidateWFRMetadata.validityProblemString += '\n At least one formula in the target workflow rule includes a function that is not currently supported in Flow. See https://help.salesforce.com/articleView?id=sf.flow_considerations_design_formulas.htm&type=5';
+                    isValid = false;
+                } else if (node.getChildElement('reevaluateOnChange', SOAP_NS) != null && node.getChildElement('reevaluateOnChange', SOAP_NS).getText() == 'true'){
+                    ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + ' \n This rule has action with reevaluateOnChange ';
                     isValid = false;
                 }
                 
             }
         }
-        //if reevaluateOnChange entity exists and is true, reject with error
-        //if operation entity is not ‘Literal’, reject with error
         
-
         return isValid;
 
+    }
+
+    static Boolean isSupportedFormula(Dom.XmlNode node) {
+
+        String value = node.getChildElement('formula', SOAP_NS).getText();
+        if(String.isNotEmpty(value)) {
+            for(String unsupportedFormula : unsupportedFormulaList) {
+                if(value.contains(unsupportedFormula)) {
+                    ValidateWFRMetadata.validityProblemString += '\n At least one formula in the target workflow rule includes a function that is not currently supported in Flow. See https://help.salesforce.com/articleView?id=sf.flow_considerations_design_formulas.htm&type=5';
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public static String getActionType(Dom.XmlNode actionEntity) {
@@ -99,9 +124,7 @@ public with sharing class ValidateWFRMetadata {
             when 'FieldUpdate' {
                 if (isValidFieldUpdate(name) == true) {
                     ValidateWFRMetadata.validFieldUpdateNames.add(name);
-                } else {
-                    ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + ' \n This rule has action with reevaluateOnChange = true or with action no Literal. ';
-                }
+                } 
             }
         }
     }

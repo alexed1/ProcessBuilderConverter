@@ -22,7 +22,6 @@ export default class TransferMetadata extends LightningElement {
     @api transferMode;
     @api metadataString;
     @api objectType;
-    @api targetObject;
     modifiedName;
 
     //@wire(getFileNames ,{ zipfile : '$zipFileString'})
@@ -55,6 +54,7 @@ export default class TransferMetadata extends LightningElement {
     }
 
     retrieve() {
+        console.log(' this.objectType',  this.objectType);
         requestMetadata({ metadataName : this.metadataName , metadataType : this.objectType})
         .then(result => {
             
