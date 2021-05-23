@@ -5,7 +5,15 @@
             "default": true,
             "package": "pbconvert",
             "versionName": "ver 0.1",
-            "versionNumber": "0.1.0.NEXT"
+            "versionNumber": "0.1.0.NEXT",
+            "dependencies": [
+                {
+                    "package": "FlowActionsBasePack@2.18.0-0"
+                },
+                {
+                    "package": "FlowScreenComponentsBasePack@2.1.7-0"
+                }
+            ]
         }
     ],
     "namespace": "",
@@ -14,6 +22,10 @@
     "packageAliases": {
         "pbconvert": "0HoB0000000Cb2yKAC",
         "pbconvert@1.0.0-0": "04tB0000000P0GVIA0",
-        "pbconvert@1.0.1-0": "04tB0000000P2ysIAC"
+        "pbconvert@1.0.1-0": "04tB0000000P2ysIAC",
+        "FlowActionsBasePack@2.12.0-0": "04t4W000002vyNZQAY",
+        "FlowActionsBasePack@2.18.0-0": "04t4W000003088GQAQ",
+        "FlowScreenComponentsBasePack@2.1.7-0": "04t5G0000047xDpQAI"
     }
 }
+
