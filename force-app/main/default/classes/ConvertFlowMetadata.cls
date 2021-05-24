@@ -258,11 +258,13 @@ public with sharing class ConvertFlowMetadata {
         Dom.XmlNode rule = decision.getChildElement('rules', SOAP_NS);
         if(rule != null) {
             Dom.XmlNode connector = rule.getChildElement('connector', SOAP_NS);
+            if(connector != null){
             Dom.XmlNode targetReference = connector.getChildElement('targetReference', SOAP_NS);
             String refName = targetReference.getText();
             if(refName != null) {
                 return refName;
             }
+        }
         }
         return null;
     }
