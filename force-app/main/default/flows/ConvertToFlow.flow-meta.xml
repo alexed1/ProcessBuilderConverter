@@ -163,6 +163,11 @@
             <label>Workflow Rules</label>
         </rules>
     </decisions>
+    <formulas>
+        <name>convertedFlowName</name>
+        <dataType>String</dataType>
+        <expression>&apos;converted_&apos; + {!targetPicker.selectedFlowApiName}</expression>
+    </formulas>
     <interviewLabel>2Convert {!$Flow.CurrentDateTime}</interviewLabel>
     <label>ConvertToFlow</label>
     <processMetadataValues>
@@ -195,6 +200,11 @@
         <connector>
             <targetReference>SelectSourceProcess</targetReference>
         </connector>
+        <fields>
+            <name>dispConvert</name>
+            <fieldText>&lt;p&gt;&lt;b style=&quot;font-size: 16px;&quot;&gt;Welcome to ConvertToFlow!&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;Select the process or rule that you&apos;d like to convert. This doesn&apos;t affect the original process, but actually creates a separate new flow that starts with &apos;converted_&apos;.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;CAUTION&lt;/b&gt;: we are not disabling the original processes and rules, which means that when you activate the new flow, you will have two different processes triggering on the same event unless you deactivate the original process or rule.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
         <fields>
             <name>rbConvertWhich</name>
             <choiceReferences>ProcessBuilder</choiceReferences>
@@ -305,7 +315,7 @@
             <inputParameters>
                 <name>metadataName</name>
                 <value>
-                    <elementReference>targetPicker.selectedFlowApiName</elementReference>
+                    <elementReference>convertedFlowName</elementReference>
                 </value>
             </inputParameters>
             <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
