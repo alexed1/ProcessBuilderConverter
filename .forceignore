@@ -4,7 +4,7 @@
 
 **profile
 package.xml
-force-app/main/default/workflows/Account.workflow-meta.xml
+#force-app/main/default/workflows/Account.workflow-meta.xml
 
 
 # LWC configuration files
