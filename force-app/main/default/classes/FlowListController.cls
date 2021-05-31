@@ -67,11 +67,13 @@ global with sharing class FlowListController {
            
         usf.MetadataService.FileProperties[] fileProperties = service.listMetadata(queries, 25);
         System.debug('fileProperties is: ' + fileProperties);
-        for(usf.MetadataService.FileProperties fileProperty : fileProperties){
-            String curWFRdef =  fileProperty.fullName;
-            System.debug(fileProperty.fullName);
-            curWFRNames.add(curWFRdef);
-        }
+        if(fileProperties != null) {
+            for(usf.MetadataService.FileProperties fileProperty : fileProperties){
+                String curWFRdef =  fileProperty.fullName;
+                System.debug(fileProperty.fullName);
+                curWFRNames.add(curWFRdef);
+            }
+        }   
            
         System.debug (curWFRNames);
         return curWFRNames;
