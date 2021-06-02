@@ -195,6 +195,7 @@ public with sharing class ModifyFlowMetadata {
         //find and replace
          String metadataString = doc.toXmlString();
         metadataString = metadataString.replace('myVariable_current', '$Record');
+        metadataString = metadataString.replace('{!$', '{! $');
         //System.debug('metadatastring is: ' + metadataString);
         Dom.Document convertedDoc = new Dom.Document();
         convertedDoc.load(metadataString);   

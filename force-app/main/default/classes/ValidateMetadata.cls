@@ -17,10 +17,12 @@ public with sharing class ValidateMetadata {
         //terminate conversion if any of these are found
 
         //get all decision elements, for each element, if one of these is true, then validate problem string = x
+        Dom.XmlNode  pmv_TriggerType = XmlUtils.getChildProcessMetadataValueByName(flowXML,'TriggerType');
+        String triggerType = XmlUtils.getProcessMetadataValue(pmv_TriggerType);
         List<Dom.XmlNode> decisionNodes = XmlUtils.getChildrenByName(flowXml, 'decisions');
         for (Dom.XMLNode curDecision : decisionNodes) {
-            if (containsIsChangedInName(curDecision))
-                validityProblemString = validityProblemString + 'The selected process uses IsChanged operator, and Flow doesn\'t currently support that. \n';
+            if (containsIsChangedInName(curDecision) && triggerType == 'onCreateOnly')
+                validityProblemString = validityProblemString + 'The selected process uses IsChanged operator On Create FLow, this supported only in Update Flow\n';
             System.debug ('current validity string is: ' + validityProblemString);
 
         }
@@ -28,14 +30,14 @@ public with sharing class ValidateMetadata {
         List<Dom.XmlNode> formulaNodes = XmlUtils.getChildrenByName(flowXml, 'formulas');
         for (Dom.XMLNode curFormula : formulaNodes) {
             Dom.XmlNode expressionNode = curFormula.getChildElement('expression', SOAP_NS);
-            if (expressionNode != null) {
-                if (expressionNode.getText().contains('ISCHANGED')) {           
-                    validityProblemString = validityProblemString + 'The selected process uses ISCHANGED in a formula, and Flow doesn\'t currently support that. \n';
-                }
-                if (expressionNode.getText().contains('ISNEW')) {           
-                    validityProblemString = validityProblemString + 'The selected process uses ISNEW in a formula, and Flow doesn\'t currently support that. \n';
-                }
-            }
+            // if (expressionNode != null) {
+            //     if (expressionNode.getText().contains('ISCHANGED')) {           
+            //         validityProblemString = validityProblemString + 'The selected process uses ISCHANGED in a formula, and Flow doesn\'t currently support that. \n';
+            //     }
+            //     if (expressionNode.getText().contains('ISNEW')) {           
+            //         validityProblemString = validityProblemString + 'The selected process uses ISNEW in a formula, and Flow doesn\'t currently support that. \n';
+            //     }
+            // }
         }
         List<Dom.XmlNode> waitEventsNodes = flowXML.getChildElements();
         for(Dom.XmlNode waits:waitEventsNodes){

@@ -12,8 +12,6 @@ public with sharing class ValidateWFRMetadata {
             'GETRECORDIDS',
             'IMAGE',
             'INCLUDE',
-            'ISCHANGED',
-            'ISNEW',
             'PARENTGROUPVAL',
             'PREVGROUPVAL',
             'PRIORVALUE',
