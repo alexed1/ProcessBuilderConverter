@@ -99,7 +99,7 @@ public with sharing class ConvertFlowMetadata {
                 if(inputPar.getText() =='TimeOffset'){
                     Dom.XmlNode timeOffsetValue = nodes.getChildElement('value', SOAP_NS).getChildElement('numberValue', SOAP_NS);
                     String returnValue = timeOffsetValue.getText();
-                    newWaiwr.offsetNumber = returnValue.replaceAll('[^1-9\\s+]', '');
+                    newWaiwr.offsetNumber = String.valueOf(Integer.valueOf(returnValue));//returnValue.replaceAll('[^1-9\\s+]', '');
                     
                 }
                 if(inputPar.getText() =='TimeFieldColumnEnumOrId'){
