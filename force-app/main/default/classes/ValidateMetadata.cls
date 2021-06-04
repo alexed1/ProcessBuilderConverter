@@ -49,7 +49,7 @@ public with sharing class ValidateMetadata {
                     }
                 }
             if(waitCounter>1){
-                validityProblemString = validityProblemString + 'There cannot be more than one Scheduled action related to one criteria . \n';
+                validityProblemString = validityProblemString + 'There cannot be more than one Scheduled action related to one criteria. \n';
             }
             }
         }
