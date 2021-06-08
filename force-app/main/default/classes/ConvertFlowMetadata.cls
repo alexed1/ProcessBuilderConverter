@@ -48,8 +48,6 @@ public with sharing class ConvertFlowMetadata {
         Dom.Document doc = new Dom.Document();
         doc.load(metadata);
         Dom.XMLNode flowXML = doc.getRootElement();
-        System.debug('getChildElements ' +flowXML.getChildElements().size() + flowXML.getChildElements());
-        System.debug('getChildren ' + flowXML.getChildren().size() + flowXML.getChildren());
         Dom.XmlNode pmv_ObjectType = XmlUtils.getChildProcessMetadataValueByName(flowXML,'ObjectType');
         String contextObjectType = XmlUtils.getProcessMetadataValue(pmv_ObjectType);
         System.debug('contextObjectType for flow: ' + flowName +' is: ' + contextObjectType);
