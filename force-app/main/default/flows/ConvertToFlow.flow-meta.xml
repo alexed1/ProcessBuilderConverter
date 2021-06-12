@@ -50,7 +50,7 @@
         </inputParameters>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </actionCalls>
-    <apiVersion>49.0</apiVersion>
+    <apiVersion>51.0</apiVersion>
     <assignments>
         <name>Consolidate_Results</name>
         <label>Consolidate Results</label>

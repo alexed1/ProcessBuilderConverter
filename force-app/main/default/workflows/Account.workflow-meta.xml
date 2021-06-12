@@ -63,26 +63,4 @@
             <workflowTimeTriggerUnit>Days</workflowTimeTriggerUnit>
         </workflowTimeTriggers>
     </rules>
-    <rules>
-        <fullName>UpdateField2</fullName>
-        <actions>
-            <name>Update_Employees</name>
-            <type>FieldUpdate</type>
-        </actions>
-        <actions>
-            <name>Update_Rating</name>
-            <type>FieldUpdate</type>
-        </actions>
-        <active>false</active>
-        <criteriaItems>
-            <field>Account.Name</field>
-            <operation>equals</operation>
-            <value>Maturin</value>
-        </criteriaItems>
-        <triggerType>onCreateOrTriggeringUpdate</triggerType>
-        <workflowTimeTriggers>
-            <timeLength>30</timeLength>
-            <workflowTimeTriggerUnit>Days</workflowTimeTriggerUnit>
-        </workflowTimeTriggers>
-    </rules>
 </Workflow>
