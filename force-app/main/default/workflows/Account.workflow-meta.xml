@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <alerts>
+        <fullName>TestEmailAlert1</fullName>
+        <ccEmails>foo@edelstein.org</ccEmails>
+        <description>TestEmailAlert1</description>
+        <protected>false</protected>
+        <recipients>
+            <recipient>test-3kcza6d1h02q@example.com</recipient>
+            <type>user</type>
+        </recipients>
+        <senderType>CurrentUser</senderType>
+        <template>unfiled$public/ClassicTemplate1</template>
+    </alerts>
     <fieldUpdates>
         <fullName>Update_Account</fullName>
         <description>descibe</description>

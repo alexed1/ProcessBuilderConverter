@@ -417,6 +417,11 @@
             <targetReference>Which_Parser</targetReference>
         </connector>
         <fields>
+            <name>dispSelect</name>
+            <fieldText>&lt;p&gt;Select Source Process:&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
             <name>targetPicker</name>
             <extensionName>c:flowPickerFSC</extensionName>
             <fieldType>ComponentInstance</fieldType>
