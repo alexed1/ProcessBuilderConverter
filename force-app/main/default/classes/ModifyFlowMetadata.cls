@@ -231,15 +231,17 @@ public with sharing class ModifyFlowMetadata {
         startNode.addChildElement('recordTriggerType', SOAP_NS, null).addTextNode(
             String.isEmpty(triggerType) ? 'Create' : triggerType == 'onAllChanges' ? 'CreateAndUpdate' : 'Create'
             );
+            Integer scheduleCount = 1;
             for(ConvertFlowMetadata.WaitElementsWrapper waitElements: elements){
-            Dom.XmlNode scheduledNode = startNode.addChildElement('scheduledPaths', SOAP_NS, null);
-            scheduledNode.addChildElement('name', SOAP_NS,null).addTextNode(waitElements.schName);
-            scheduledNode.addChildElement('connector', SOAP_NS, null).addChildElement('targetReference', SOAP_NS, null).addTextNode(waitElements.connector);
-            scheduledNode.addChildElement('label', SOAP_NS, null).addTextNode(waitElements.label);
-            scheduledNode.addChildElement('offsetNumber', SOAP_NS, null).addTextNode(waitElements.offsetNumber);
-            scheduledNode.addChildElement('offsetUnit', SOAP_NS, null).addTextNode(waitElements.offsetUnit);
-            scheduledNode.addChildElement('recordField', SOAP_NS, null).addTextNode(waitElements.recordField);
-            scheduledNode.addChildElement('timeSource', SOAP_NS, null).addTextNode('RecordField');
+                Dom.XmlNode scheduledNode = startNode.addChildElement('scheduledPaths', SOAP_NS, null);
+                scheduledNode.addChildElement('name', SOAP_NS,null).addTextNode('Scheduled_Path_' + scheduleCount);
+                scheduledNode.addChildElement('connector', SOAP_NS, null).addChildElement('targetReference', SOAP_NS, null).addTextNode(waitElements.connector);
+                scheduledNode.addChildElement('label', SOAP_NS, null).addTextNode('Scheduled Path ' + scheduleCount);
+                scheduledNode.addChildElement('offsetNumber', SOAP_NS, null).addTextNode(waitElements.offsetNumber);
+                scheduledNode.addChildElement('offsetUnit', SOAP_NS, null).addTextNode(waitElements.offsetUnit);
+                scheduledNode.addChildElement('recordField', SOAP_NS, null).addTextNode(waitElements.recordField);
+                scheduledNode.addChildElement('timeSource', SOAP_NS, null).addTextNode('RecordField');
+                scheduleCount++;
             }
         startNode.addChildElement('triggerType', SOAP_NS, null).addTextNode('RecordAfterSave');
         
