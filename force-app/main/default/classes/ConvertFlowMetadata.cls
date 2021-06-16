@@ -108,8 +108,8 @@ public with sharing class ConvertFlowMetadata {
         removeAssigmentsElements(flowXML);
         removeAssigmentReference(flowXML);
         for(WaitElementsWrapper elementName:waitElWr){
-        removeWaitsElements(flowXML);
-        removeWaitRefName(flowXML,elementName.schName);
+            removeWaitsElements(flowXML);
+            removeWaitRefName(flowXML,elementName.schName);
         }
         checkCondition(flowXML);
         getExpression(flowXML);
@@ -126,6 +126,7 @@ public with sharing class ConvertFlowMetadata {
         doc = ModifyFlowMetadata.changeContextReference(doc);  
         doc = ModifyFlowMetadata.fixupRelatedReferences(doc);
         ModifyFlowMetadata.repositionElements(doc);
+        doc = removeEmptyDecisons(doc);
         String classText = doc.toXmlString();
         System.debug('===========');
         System.debug ('following all conversion, is: ' + classText);
@@ -356,6 +357,66 @@ public with sharing class ConvertFlowMetadata {
             value.addChildElement('stringValue', SOAP_NS, null).addTextNode('ConvertedByConvertToFlow');
             }
         return null;
+    }
+
+    public static Dom.Document removeEmptyDecisons(Dom.Document doc) {
+        Dom.XmlNode flowXML = doc.getRootElement();
+        List<Dom.XmlNode> decisionList = XmlUtils.getChildrenByName(flowXML, 'decisions');
+        List<Dom.XmlNode> decisionToDeleteList = new List<Dom.XmlNode>();
+        List<Dom.XmlNode> formulaList = XmlUtils.getChildrenByName(flowXML, 'formulas');
+        Map<string, String> referenceMap = new Map<String, String>();
+        for(Dom.XmlNode decision : decisionList) {
+            List<Dom.XmlNode> ruleList  = XmlUtils.getChildrenByName(decision, 'rules');
+            String decisionName = decision.getChildElement('name', SOAP_NS).getText();
+            if(ruleList.size() == 1) {
+                List<Dom.XmlNode> conditionList  = XmlUtils.getChildrenByName(ruleList[0], 'conditions');
+                if(conditionList.size() == 1) {
+                    for(Dom.XmlNode formula : formulaList) {
+                        String formulaText = formula.getChildElement('name', SOAP_NS).getText();
+                        String conditionFomulaRef = conditionList[0].getChildElement('leftValueReference',SOAP_NS).getText();
+                        String formulaExpression = formula.getChildElement('expression', SOAP_NS).getText();
+                        if(formulaText == conditionFomulaRef && formulaExpression == 'true') {
+                            
+                            Dom.XmlNode connector = ruleList[0].getChildElement('connector', SOAP_NS);
+                            String reference = '';
+                            if(connector != null) {
+                                reference = connector.getChildElement('targetReference', SOAP_NS).getText();
+                            }
+                            decisionToDeleteList.add(decision);
+                            referenceMap.put(decisionName, reference);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        System.debug('decisions to remove : ' + decisionToDeleteList.size()  + referenceMap);
+        
+        
+        for(Dom.XmlNode decision : decisionToDeleteList) {
+            decision.getParent().removeChild(decision);
+        }
+        List<String> keySet = new List<String>(referenceMap.keySet());
+        for(Integer i = 0; i < referenceMap.size(); i++) {
+            if(referenceMap.get(referenceMap.get(keySet[i])) != null) {
+                referenceMap.put(keySet[i],referenceMap.get(referenceMap.get(keySet[i])));
+                i--;
+            }
+        }
+        String xmlText = doc.toXmlString();
+        for(String key : referenceMap.keySet()) {
+            System.debug('decisions - ' + key + ' ' + referenceMap.get(key));
+            if(String.isEmpty(referenceMap.get(key))) {
+                xmlText = xmlText.replace('<connector><targetReference>' + key + '</targetReference></connector>', referenceMap.get(key));
+            } else {
+                xmlText = xmlText.replace(key, referenceMap.get(key));
+            }
+        }
+
+        doc =new Dom.Document();
+        doc.load(xmlText);
+        return doc;
     }
 
  
