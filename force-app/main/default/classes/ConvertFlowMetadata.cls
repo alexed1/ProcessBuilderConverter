@@ -10,13 +10,11 @@ public with sharing class ConvertFlowMetadata {
         String flowName;
 
         for (Requests req : requestList) {
-            System.debug('zip file text is:' + req.flowMetadataZipFile);
-            System.debug('flowname is:' + req.flowName);
+
 
             String flowmetadata = unpackZipfile( req.flowMetadataZipFile);
-            System.debug('initial retrieved unconverted pb metadata is: ' + flowmetadata);
+
             String validityProblemString = ValidateMetadata.validate (flowmetadata);
-            System.debug('validtyProblemString is: ' + validityProblemString);
             if(validityProblemString == '') {
                 String metadataText = convertMetadata(flowmetadata, req.flowName);
                 response.convertedFlowMetadata = metadataText;
@@ -34,13 +32,13 @@ public with sharing class ConvertFlowMetadata {
         Blob zipBlob = EncodingUtil.base64Decode(metadataZipfile);
         usf.Zippex curZippex = new usf.Zippex(zipBlob);
         Set<String> fileNames = curZippex.getFileNames();
-        System.debug('filenames are: ' + fileNames);
+
      
         List<String> filenamesList = new List<String>(fileNames);
 
            //currently only set up to handle a single file
         Blob fileData = curZippex.getFile(filenamesList[0]);
-        System.debug ('filename: ' + filenamesList[0]);
+
         return  fileData.toString();
     }
 
@@ -50,16 +48,18 @@ public with sharing class ConvertFlowMetadata {
         Dom.XMLNode flowXML = doc.getRootElement();
         Dom.XmlNode pmv_ObjectType = XmlUtils.getChildProcessMetadataValueByName(flowXML,'ObjectType');
         String contextObjectType = XmlUtils.getProcessMetadataValue(pmv_ObjectType);
-        System.debug('contextObjectType for flow: ' + flowName +' is: ' + contextObjectType);
+
 
         Dom.XmlNode  pmv_TriggerType = XmlUtils.getChildProcessMetadataValueByName(flowXML,'TriggerType');
         String triggerType = XmlUtils.getProcessMetadataValue(pmv_TriggerType);
+
         System.debug('triggerType for flow: ' + flowName +' is: ' + triggerType); 
         
         String startElementReference = removeIsChangedDecisions(flowXML);
         if(startElementReference == null) {
             startElementReference = flowXML.getChildElement('startElementReference', SOAP_NS).getText();
         }
+
         String newProcessType = 'AutolaunchedFlow';
         List<Dom.XmlNode> nodesToREmove = new List<Dom.XmlNode>();
         List<Dom.XmlNode> decisionNodes = XmlUtils.getChildrenByName(flowXml, 'decisions');
@@ -108,11 +108,12 @@ public with sharing class ConvertFlowMetadata {
             }
             waitElWr.add(newWaiwr);
         }
-        removeAssigmentsElements(flowXML);
-        removeAssigmentReference(flowXML);
+        doc = removeAssigmentsElements(doc);
+        flowXML = doc.getRootElement();
+        //removeAssigmentReference(flowXML);
         for(WaitElementsWrapper elementName:waitElWr){
-        removeWaitsElements(flowXML);
-        removeWaitRefName(flowXML,elementName.schName);
+            removeWaitsElements(flowXML);
+            removeWaitRefName(flowXML,elementName.schName);
         }
         checkCondition(flowXML);
         getExpression(flowXML);
@@ -129,6 +130,8 @@ public with sharing class ConvertFlowMetadata {
         doc = ModifyFlowMetadata.changeContextReference(doc);  
         doc = ModifyFlowMetadata.fixupRelatedReferences(doc);
         ModifyFlowMetadata.repositionElements(doc);
+        doc = removeNoCriteriaDecisons(doc);
+        doc = removeEmptyDecisons(doc);
         String classText = doc.toXmlString();
         System.debug('===========');
         System.debug ('following all conversion, is: ' + classText);
@@ -202,20 +205,28 @@ public with sharing class ConvertFlowMetadata {
                 Dom.XmlNode targetRef = desConnector.getChildElement('targetReference', SOAP_NS);
                 if(targetRef.getText() == name){
                     desConnector.getParent().removeChild(desConnector);
+                } else {
+                    Dom.XmlNode defaultConnector = waitRef.getChildElement('defaultConnector', SOAP_NS);
+                    if(defaultConnector != null) {
+                        String referenceName = defaultConnector.getChildElement('targetReference', SOAP_NS).getText();
+                        if(referenceName == name) {
+                            defaultConnector.getParent().removeChild(defaultConnector);
+                        }
+                    }
                 }
             }
             }
         
             else{
-            Dom.XmlNode connector = waitRef.getChildElement('connector', SOAP_NS);
-            if(connector != null){
-            Dom.XmlNode targetReference = connector.getChildElement('targetReference', SOAP_NS);
-            String refName = targetReference.getText();
-            if(refName == name) {    
-                connector.getParent().removeChild(connector);
+                Dom.XmlNode connector = waitRef.getChildElement('connector', SOAP_NS);
+                if(connector != null){
+                    Dom.XmlNode targetReference = connector.getChildElement('targetReference', SOAP_NS);
+                    String refName = targetReference.getText();
+                    if(refName == name) {    
+                        connector.getParent().removeChild(connector);
+                    }
+                }
             }
-        }
-    }
         }
         return null;
     }
@@ -341,15 +352,44 @@ public with sharing class ConvertFlowMetadata {
         return null;
     }
 
-    public static Dom.XmlNode removeAssigmentsElements(Dom.XmlNode flowXML) {
+    public static Dom.Document removeAssigmentsElements(Dom.Document doc) {
+        Dom.XmlNode flowXML = doc.getRootElement();
         List<Dom.XmlNode> assignmentsNode = XmlUtils.getChildrenByName(flowXML, 'assignments');
+        Map<String, String> referenceMap = new Map<String, String>();
+
+
         for(Dom.XmlNode assignment : assignmentsNode) {
             Dom.XmlNode parent = assignment.getParent();
+            String assignmentName = assignment.getChildElement('name', SOAP_NS).getText();
+            String referenceName = assignment.getChildElement('connector', SOAP_NS).getChildElement('targetReference', SOAP_NS).getText();
             if(parent != null){
+
+                referenceMap.put(assignmentName, referenceName);
                 parent.removeChild(assignment);
             }
         }
-        return null;
+
+        List<String> keySet = new List<String>(referenceMap.keySet());
+        for(Integer i = 0; i < referenceMap.size(); i++) {
+            if(referenceMap.get(referenceMap.get(keySet[i])) != null) {
+                referenceMap.put(keySet[i],referenceMap.get(referenceMap.get(keySet[i])));
+                i--;
+            }
+        }
+
+        String xmlText = doc.toXmlString();
+        for(String key : referenceMap.keySet()) {
+            System.debug('decisions - ' + key + ' ' + referenceMap.get(key));
+            if(String.isEmpty(referenceMap.get(key))) {
+                xmlText = xmlText.replace('<connector><targetReference>' + key + '</targetReference></connector>', referenceMap.get(key));
+            } else {
+                xmlText = xmlText.replace(key, referenceMap.get(key));
+            }
+        }
+
+        doc =new Dom.Document();
+        doc.load(xmlText);
+        return doc;
     }
 
     public static Dom.XmlNode removeAssigmentReference(Dom.XmlNode flowXML){
@@ -405,6 +445,118 @@ public with sharing class ConvertFlowMetadata {
             }
         return null;
     }
+
+    public static Dom.Document removeNoCriteriaDecisons(Dom.Document doc) {
+        Dom.XmlNode flowXML = doc.getRootElement();
+        List<Dom.XmlNode> decisionList = XmlUtils.getChildrenByName(flowXML, 'decisions');
+        List<Dom.XmlNode> decisionToDeleteList = new List<Dom.XmlNode>();
+        List<Dom.XmlNode> formulaList = XmlUtils.getChildrenByName(flowXML, 'formulas');
+        Map<string, String> referenceMap = new Map<String, String>();
+        for(Dom.XmlNode decision : decisionList) {
+            List<Dom.XmlNode> ruleList  = XmlUtils.getChildrenByName(decision, 'rules');
+            String decisionName = decision.getChildElement('name', SOAP_NS).getText();
+            if(ruleList.size() == 1) {
+                List<Dom.XmlNode> conditionList  = XmlUtils.getChildrenByName(ruleList[0], 'conditions');
+                if(conditionList.size() == 1) {
+                    for(Dom.XmlNode formula : formulaList) {
+                        String formulaText = formula.getChildElement('name', SOAP_NS).getText();
+                        String conditionFomulaRef = conditionList[0].getChildElement('leftValueReference',SOAP_NS).getText();
+                        String formulaExpression = formula.getChildElement('expression', SOAP_NS).getText();
+                        if(formulaText == conditionFomulaRef && formulaExpression == 'true') {
+                            
+                            Dom.XmlNode connector = ruleList[0].getChildElement('connector', SOAP_NS);
+                            String reference = '';
+                            if(connector != null) {
+                                reference = connector.getChildElement('targetReference', SOAP_NS).getText();
+                            } 
+                            decisionToDeleteList.add(decision);
+                            referenceMap.put(decisionName, reference);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+        for(Dom.XmlNode decision : decisionToDeleteList) {
+            decision.getParent().removeChild(decision);
+        }
+        List<String> keySet = new List<String>(referenceMap.keySet());
+        for(Integer i = 0; i < referenceMap.size(); i++) {
+            if(referenceMap.get(referenceMap.get(keySet[i])) != null) {
+                referenceMap.put(keySet[i],referenceMap.get(referenceMap.get(keySet[i])));
+                i--;
+            }
+        }
+        String xmlText = doc.toXmlString();
+        for(String key : referenceMap.keySet()) {
+            System.debug('decisions - ' + key + ' ' + referenceMap.get(key));
+            if(String.isEmpty(referenceMap.get(key))) {
+                xmlText = xmlText.replaceAll('\n', '');
+                xmlText = xmlText.replace('<connector><targetReference>' + key + '</targetReference></connector>', referenceMap.get(key));
+                xmlText = xmlText.replaceAll('<defaultConnector>(.*' + key + '.*)</defaultConnector>', referenceMap.get(key));
+                
+            } else {
+                xmlText = xmlText.replace(key, referenceMap.get(key));
+            }
+        }
+
+        doc =new Dom.Document();
+        doc.load(xmlText);
+        return doc;
+    }
+
+    public static Dom.Document removeEmptyDecisons(Dom.Document doc) {
+        Dom.XmlNode flowXML = doc.getRootElement();
+        List<Dom.XmlNode> decisionList = XmlUtils.getChildrenByName(flowXML, 'decisions');
+        List<Dom.XmlNode> decisionToDeleteList = new List<Dom.XmlNode>();
+        Map<string, String> referenceMap = new Map<String, String>();
+        for(Dom.XmlNode decision : decisionList) {
+            List<Dom.XmlNode> ruleList  = XmlUtils.getChildrenByName(decision, 'rules');
+            String referenceName = '';
+            Dom.XmlNode defaultConnector = decision.getChildElement('defaultConnector', SOAP_NS);
+            if(defaultConnector != null) {
+                referenceName = defaultConnector.getChildElement('targetReference', SOAP_NS).getText();
+            }
+            String decisionName = decision.getChildElement('name', SOAP_NS).getText();
+            if(ruleList.size() == 1) {
+                Dom.XmlNode connector = ruleList[0].getChildElement('connector', SOAP_NS);
+                if(connector == null) {
+                    referenceMap.put(decisionName, referenceName);
+                    decisionToDeleteList.add(decision);
+                }
+    
+            }
+        }        
+        
+        for(Dom.XmlNode decision : decisionToDeleteList) {
+            decision.getParent().removeChild(decision);
+        }
+        List<String> keySet = new List<String>(referenceMap.keySet());
+        for(Integer i = 0; i < referenceMap.size(); i++) {
+            if(referenceMap.get(referenceMap.get(keySet[i])) != null) {
+                referenceMap.put(keySet[i],referenceMap.get(referenceMap.get(keySet[i])));
+                i--;
+            }
+        }
+        String xmlText = doc.toXmlString();
+        for(String key : referenceMap.keySet()) {
+            System.debug('decisions - ' + key + ' ' + referenceMap.get(key));
+            if(String.isEmpty(referenceMap.get(key))) {
+                xmlText = xmlText.replaceAll('\n', '');
+                xmlText = xmlText.replace('<connector><targetReference>' + key + '</targetReference></connector>', referenceMap.get(key));
+                xmlText = xmlText.replaceAll('<defaultConnector>(.*' + key + '.*)</defaultConnector>', referenceMap.get(key));
+            } else {
+                xmlText = xmlText.replace(key, referenceMap.get(key));
+            }
+        }
+
+        doc =new Dom.Document();
+        doc.load(xmlText);
+        return doc;
+    }
+
 
  
 

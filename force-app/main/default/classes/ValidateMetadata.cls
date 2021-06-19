@@ -27,6 +27,16 @@ public with sharing class ValidateMetadata {
 
         }
 
+        List<Dom.XmlNode> processMetadataValueNodes = XmlUtils.getChildrenByName(flowXml, 'processMetadataValues');
+        for (Dom.XMLNode processMetadata : processMetadataValueNodes) {
+            String processMetadataName = processMetadata.getChildElement('name', SOAP_NS).getText(); 
+            if (processMetadataName == 'RecursiveCountVariable') {
+                validityProblemString = validityProblemString + 'The selected process uses Recursion, and Flow doesn\'t currently support that. \n';
+            }
+            System.debug ('current validity string is: ' + validityProblemString);
+            
+
+        }
         List<Dom.XmlNode> formulaNodes = XmlUtils.getChildrenByName(flowXml, 'formulas');
         for (Dom.XMLNode curFormula : formulaNodes) {
             Dom.XmlNode expressionNode = curFormula.getChildElement('expression', SOAP_NS);
