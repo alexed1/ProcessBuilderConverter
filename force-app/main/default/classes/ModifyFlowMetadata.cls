@@ -195,6 +195,7 @@ public with sharing class ModifyFlowMetadata {
         //find and replace
          String metadataString = doc.toXmlString();
         metadataString = metadataString.replace('myVariable_current', '$Record');
+        metadataString = metadataString.replace('{!$', '{! $');
         //System.debug('metadatastring is: ' + metadataString);
         Dom.Document convertedDoc = new Dom.Document();
         convertedDoc.load(metadataString);   
@@ -231,16 +232,20 @@ public with sharing class ModifyFlowMetadata {
         startNode.addChildElement('recordTriggerType', SOAP_NS, null).addTextNode(
             String.isEmpty(triggerType) ? 'Create' : triggerType == 'onAllChanges' ? 'CreateAndUpdate' : 'Create'
             );
-            for(ConvertFlowMetadata.WaitElementsWrapper waitElements: elements){
+        for(ConvertFlowMetadata.WaitElementsWrapper waitElements: elements){
             Dom.XmlNode scheduledNode = startNode.addChildElement('scheduledPaths', SOAP_NS, null);
             scheduledNode.addChildElement('name', SOAP_NS,null).addTextNode(waitElements.schName);
             scheduledNode.addChildElement('connector', SOAP_NS, null).addChildElement('targetReference', SOAP_NS, null).addTextNode(waitElements.connector);
             scheduledNode.addChildElement('label', SOAP_NS, null).addTextNode(waitElements.label);
             scheduledNode.addChildElement('offsetNumber', SOAP_NS, null).addTextNode(waitElements.offsetNumber);
             scheduledNode.addChildElement('offsetUnit', SOAP_NS, null).addTextNode(waitElements.offsetUnit);
-            scheduledNode.addChildElement('recordField', SOAP_NS, null).addTextNode(waitElements.recordField);
-            scheduledNode.addChildElement('timeSource', SOAP_NS, null).addTextNode('RecordField');
+            if(waitElements.recordField!= null) {
+                scheduledNode.addChildElement('recordField', SOAP_NS, null).addTextNode(waitElements.recordField);
+            } else {
+                scheduledNode.addChildElement('recordField', SOAP_NS, null).addTextNode('LastModifiedDate');
             }
+            scheduledNode.addChildElement('timeSource', SOAP_NS, null).addTextNode('RecordField');
+        }
         startNode.addChildElement('triggerType', SOAP_NS, null).addTextNode('RecordAfterSave');
         
 

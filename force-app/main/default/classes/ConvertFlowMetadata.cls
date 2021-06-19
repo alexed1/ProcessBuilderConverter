@@ -48,7 +48,6 @@ public with sharing class ConvertFlowMetadata {
         Dom.Document doc = new Dom.Document();
         doc.load(metadata);
         Dom.XMLNode flowXML = doc.getRootElement();
-       
         Dom.XmlNode pmv_ObjectType = XmlUtils.getChildProcessMetadataValueByName(flowXML,'ObjectType');
         String contextObjectType = XmlUtils.getProcessMetadataValue(pmv_ObjectType);
         System.debug('contextObjectType for flow: ' + flowName +' is: ' + contextObjectType);
@@ -56,7 +55,11 @@ public with sharing class ConvertFlowMetadata {
         Dom.XmlNode  pmv_TriggerType = XmlUtils.getChildProcessMetadataValueByName(flowXML,'TriggerType');
         String triggerType = XmlUtils.getProcessMetadataValue(pmv_TriggerType);
         System.debug('triggerType for flow: ' + flowName +' is: ' + triggerType); 
-        String startElementReference = flowXML.getChildElement('startElementReference', SOAP_NS).getText();
+        
+        String startElementReference = removeIsChangedDecisions(flowXML);
+        if(startElementReference == null) {
+            startElementReference = flowXML.getChildElement('startElementReference', SOAP_NS).getText();
+        }
         String newProcessType = 'AutolaunchedFlow';
         List<Dom.XmlNode> nodesToREmove = new List<Dom.XmlNode>();
         List<Dom.XmlNode> decisionNodes = XmlUtils.getChildrenByName(flowXml, 'decisions');
@@ -94,7 +97,7 @@ public with sharing class ConvertFlowMetadata {
                 if(inputPar.getText() =='TimeOffset'){
                     Dom.XmlNode timeOffsetValue = nodes.getChildElement('value', SOAP_NS).getChildElement('numberValue', SOAP_NS);
                     String returnValue = timeOffsetValue.getText();
-                    newWaiwr.offsetNumber = returnValue.replaceAll('[^1-9\\s+]', '');
+                    newWaiwr.offsetNumber = String.valueOf(Integer.valueOf(returnValue));//returnValue.replaceAll('[^1-9\\s+]', '');
                     
                 }
                 if(inputPar.getText() =='TimeFieldColumnEnumOrId'){
@@ -144,6 +147,51 @@ public with sharing class ConvertFlowMetadata {
         }
         return null;
     }
+
+    public static String removeIsChangedDecisions(Dom.XmlNode flowXML) {
+        List<Dom.XmlNode> decisionList = XmlUtils.getChildrenByName(flowXML, 'decisions');
+        Map<String, Dom.XmlNode> rulesMap = new Map<String, Dom.XmlNode>();
+
+        String referenceName;
+        for(Dom.XmlNode decision : decisionList) {
+            if(ValidateMetadata.containsIsChangedInName(decision)) {
+                Dom.XmlNode rule = decision.getChildElement('rules', SOAP_NS);
+                rulesMap.put(rule.getChildElement('name', SOAP_NS).getText(), rule);
+                Dom.XmlNode parent = decision.getParent();
+                referenceName = decision.getChildElement('defaultConnector', SOAP_NS).getChildElement('targetReference', SOAP_NS).getText();
+                if(parent != null){
+                    parent.removeChild(decision);
+                }
+            }
+        }
+
+        for(Dom.XmlNode decision : decisionList) {
+            if(!ValidateMetadata.containsIsChangedInName(decision)) {
+                List<Dom.XmlNode> conditionList = XmlUtils.getChildrenByName(decision.getChildElement('rules', SOAP_NS), 'conditions');
+                for(Dom.XmlNode condition : conditionList) {
+                    Dom.XmlNode leftValueReference = condition.getChildElement('leftValueReference', SOAP_NS);
+                    Dom.XmlNode rules = rulesMap.get(leftValueReference.getText());
+                    if(rules != null) {
+                        Dom.XmlNode conditionIsChange = XmlUtils.getChildrenByName(rules ,'conditions')[1];
+
+                        String field = conditionIsChange.getChildElement('leftValueReference', SOAP_NS).getText();
+                        Boolean rightValue = (conditionIsChange.getChildElement('operator', SOAP_NS).getText() == 'NotEqualTo');
+
+                        leftValueReference.getParent().removeChild(leftValueReference);
+                        condition.addChildElement('leftValueReference', SOAP_NS, null).addTextNode(field.replace('myVariable_old', '$Record'));
+                        condition.removeChild(condition.getChildElement('operator', SOAP_NS));
+                        condition.addChildElement('operator', SOAP_NS, null).addTextNode('IsChanged');
+                        condition.removeChild(condition.getChildElement('rightValue', SOAP_NS));
+                        condition.addChildElement('rightValue', SOAP_NS, null).addChildElement('booleanValue', SOAP_NS, null).addTextNode(String.valueOf(rightValue));
+                    }
+
+                    
+                }
+            }
+        }   
+        return referenceName;
+    }
+
     public static Dom.XmlNode removeWaitRefName(Dom.XMLNode flowXML, String name) {
         List<Dom.XmlNode> wait = flowXML.getChildren();
         for(Dom.XmlNode waitRef:wait){
