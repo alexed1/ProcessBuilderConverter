@@ -243,8 +243,6 @@ public with sharing class ModifyFlowMetadata {
             scheduledNode.addChildElement('offsetNumber', SOAP_NS, null).addTextNode(waitElements.offsetNumber);
             scheduledNode.addChildElement('offsetUnit', SOAP_NS, null).addTextNode(waitElements.offsetUnit);
 
-            scheduledNode.addChildElement('recordField', SOAP_NS, null).addTextNode(waitElements.recordField);
-            scheduledNode.addChildElement('timeSource', SOAP_NS, null).addTextNode('RecordField');
             scheduleCount++;
 
             if(waitElements.recordField!= null) {
