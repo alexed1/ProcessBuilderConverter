@@ -27,6 +27,8 @@ public with sharing class ConvertWFRMetadata {
     };
 
     static List<DescribeFieldResult> sObjectFieldList;
+    static Map<Id, Dom.XmlNode> actionByNameMap = new Map<Id,Dom.XmlNode>();
+    static Map<Id, Dom.XmlNode> alertByNameMap = new Map<Id,Dom.XmlNode>();
 
     @InvocableMethod
     public static List <Results> convert(List<Requests> requestList) {
@@ -113,6 +115,7 @@ public with sharing class ConvertWFRMetadata {
             flowTriggerType
         );
         addConditionToStartElement(startElement, wfrRule, objectName, doesRequireRecordChangedToMeetCriteria);
+        createSchedulePaths(flowXML, wfrRule, wfrXML, objectName);
         
 
         List<Dom.XmlNode> actionList = new List<Dom.XmlNode>();
@@ -124,7 +127,8 @@ public with sharing class ConvertWFRMetadata {
             if(actionType == 'FieldUpdate') {
                 
                 Dom.XmlNode actionEntity = getAction(wfrXML,actionName);
-                Dom.XmlNode convertedFlowAction = convertFieldUpdateAction(actionEntity, flowXML, objectName);
+                Dom.XmlNode convertedFlowAction = convertFieldUpdateAction(actionEntity, flowXML, objectName, null);
+                sortXMLChildren(flowXML, convertedFlowAction, 'recordUpdates');
                 if(convertedFlowAction != null) {
                     actionList.add(convertedFlowAction);
                 }
@@ -133,6 +137,7 @@ public with sharing class ConvertWFRMetadata {
 
                 Dom.XmlNode actionEntity = getAction(wfrXML, actionName);
                 Dom.XmlNode convertedAlert = generateEmailAlert(actionEntity, flowXML, objectName, 'alert' + alertCount);
+                sortXMLChildren(flowXML, convertedAlert, 'actionCalls');
                 alertCount++;
                 if(convertedAlert != null) {
                     actionList.add(convertedAlert);
@@ -148,7 +153,7 @@ public with sharing class ConvertWFRMetadata {
             if(actionType == 'FieldUpdate') {
                 
                 Dom.XmlNode actionEntity = getAction(wfrXML,actionName);
-                Dom.XmlNode convertedFlowAction = addFormulaForFieldUpdate(actionEntity, flowXML, objectName);
+                Dom.XmlNode convertedFlowAction = addFormulaForFieldUpdate(actionEntity, flowXML, objectName, '');
                 if(convertedFlowAction != null) {
                     actionList.add(convertedFlowAction);
                 }
@@ -182,6 +187,7 @@ public with sharing class ConvertWFRMetadata {
         }
     
         addConversionLog(flowXML);
+        ConvertFlowMetadata.enableAutoLayout(flowXML);
        
 
         String classText = doc.toXmlString();
@@ -219,9 +225,13 @@ public with sharing class ConvertWFRMetadata {
             }
         return null;
     }
-    public static Dom.XmlNode convertFieldUpdateAction(Dom.XmlNode actionEntity, Dom.XmlNode flowXML, String objectName) {
+    public static Dom.XmlNode convertFieldUpdateAction(Dom.XmlNode actionEntity, Dom.XmlNode flowXML, String objectName, String schedulePathName) {
         Dom.XmlNode  recordUpdate = flowXML.addChildElement('recordUpdates', SOAP_NS, null);
         String actionName = actionEntity.getChildElement('fullName', SOAP_NS).getText();
+        if(!String.isEmpty(schedulePathName)) {
+            actionName = schedulePathName + '_' + actionName;
+        }
+
         String actionLabel = actionEntity.getChildElement('name', SOAP_NS).getText();
         recordUpdate.addChildElement('name', SOAP_NS, null).addTextNode(actionName);
         recordUpdate.addChildElement('label', SOAP_NS, null).addTextNode(actionLabel);
@@ -255,8 +265,11 @@ public with sharing class ConvertWFRMetadata {
         return recordUpdate;
     }
 
-    public static Dom.XmlNode addFormulaForFieldUpdate(Dom.XmlNode actionEntity, Dom.XmlNode flowXML, String objectName) {
+    public static Dom.XmlNode addFormulaForFieldUpdate(Dom.XmlNode actionEntity, Dom.XmlNode flowXML, String objectName, String schedulePathName) {
         String actionName = actionEntity.getChildElement('fullName', SOAP_NS).getText();
+        if(String.isNotEmpty(schedulePathName)) {
+            actionName = schedulePathName + '_' + actionName;
+        }
         String actionLabel = actionEntity.getChildElement('name', SOAP_NS).getText();
         String fieldName = actionEntity.getChildElement('field', SOAP_NS).getText();
         String operation = actionEntity.getChildElement('operation', SOAP_NS).getText();
@@ -357,6 +370,106 @@ public with sharing class ConvertWFRMetadata {
         return startElement;
     }
 
+    public static Dom.XmlNode createSchedulePaths(Dom.XmlNode flowXML, Dom.XmlNode wfrRule, Dom.XmlNode wfrXML, String objectName) {
+        List<Dom.XmlNode> timeBaseTriggerList = XmlUtils.getChildrenByName(wfrRule, 'workflowTimeTriggers');
+        Dom.XmlNode startElement = flowXML.getChildElement('start', SOAP_NS);
+        System.debug('workflowTimeTriggers:' + timeBaseTriggerList);
+        Integer scheduleCount = 1; 
+        for(Dom.XmlNode timeBasedTrigger : timeBaseTriggerList){
+            // <offsetFromField>Account.LastModifiedDate</offsetFromField>
+            // <timeLength>-2</timeLength>
+            // <workflowTimeTriggerUnit>Days</workflowTimeTriggerUnit>
+            Dom.XmlNode offsetFromField = timeBasedTrigger.getChildElement('offsetFromField', SOAP_NS);
+            Dom.XmlNode timeLength = timeBasedTrigger.getChildElement('timeLength', SOAP_NS);
+            Dom.XmlNode workflowTimeTriggerUnit = timeBasedTrigger.getChildElement('workflowTimeTriggerUnit', SOAP_NS);
+            Dom.XmlNode scheduledNode = startElement.addChildElement('scheduledPaths', SOAP_NS, null);
+
+            scheduledNode.addChildElement('name', SOAP_NS,null).addTextNode('Scheduled_Path_' + scheduleCount);
+            //scheduledNode.addChildElement('connector', SOAP_NS, null).addChildElement('targetReference', SOAP_NS, null).addTextNode(waitElements.connector);
+            scheduledNode.addChildElement('label', SOAP_NS, null).addTextNode('Scheduled Path ' + scheduleCount);
+            scheduledNode.addChildElement('offsetNumber', SOAP_NS, null).addTextNode(timeLength.getText());
+            scheduledNode.addChildElement('offsetUnit', SOAP_NS, null).addTextNode(workflowTimeTriggerUnit.getText());
+
+            List<Dom.XmlNode> actionList = new List<Dom.XmlNode>();
+            List<Dom.XmlNode> actionNameList = ValidateWFRMetadata.getRuleActions(timeBasedTrigger);
+            Integer alertCount = 1;
+            for(Dom.XmlNode action : actionNameList) {
+                String actionType = ValidateWFRMetadata.getActionType(action);
+                String actionName = ValidateWFRMetadata.getActionName(action);
+                if(actionType == 'FieldUpdate') {
+                    
+                    Dom.XmlNode actionEntity = getAction(wfrXML,actionName);
+                    Dom.XmlNode convertedFlowAction = convertFieldUpdateAction(actionEntity, flowXML, objectName, 'Scheduled_Path_' + scheduleCount);
+                    sortXMLChildren(flowXML, convertedFlowAction, 'recordUpdates');
+                    if(convertedFlowAction != null) {
+                        actionList.add(convertedFlowAction);
+                    }
+
+                    addFormulaForFieldUpdate(actionEntity, flowXML, objectName, 'Scheduled_Path_' + scheduleCount);
+    
+                } else if(actionType == 'Alert') {
+    
+                    Dom.XmlNode actionEntity = getAction(wfrXML, actionName);
+                    Dom.XmlNode convertedAlert = generateEmailAlert(actionEntity, flowXML, objectName, 'Scheduled_Path_' + scheduleCount + '_alert' + alertCount);
+                    //actionCalls
+                    sortXMLChildren(flowXML, convertedAlert, 'actionCalls');
+                    alertCount++;
+                    if(convertedAlert != null) {
+                        actionList.add(convertedAlert);
+                    }
+    
+                }
+    
+            }
+
+            if(actionList.size() > 0) {
+                Integer positionY = 500;
+                Dom.XmlNode firstAction = actionList[0];
+                
+                scheduledNode.addChildElement('connector', SOAP_NS, null)
+                    .addChildElement('targetReference', SOAP_NS, null)
+                        .addTextNode(firstAction.getChildElement('name', SOAP_NS).getText());
+                    
+                firstAction.addChildElement('locationX', SOAP_NS, null).addTextNode(String.valueOf(500 * scheduleCount));
+                firstAction.addChildElement('locationY', SOAP_NS, null).addTextNode(String.valueOf(positionY));
+                positionY += 300;
+                if(actionList.size() > 1) {
+                    for(Integer i = 0; i < actionList.size() - 1; i++) {
+                        actionList[i].addChildElement('connector', SOAP_NS, null)
+                            .addChildElement('targetReference', SOAP_NS, null)
+                                .addTextNode(actionList[i+1].getChildElement('name', SOAP_NS).getText());
+                        actionList[i+1].addChildElement('locationX', SOAP_NS, null).addTextNode(String.valueOf(500 * scheduleCount));
+                        actionList[i+1].addChildElement('locationY', SOAP_NS, null).addTextNode(String.valueOf(positionY));
+                        positionY += 100;
+                    }
+                }
+            }
+            scheduleCount++;
+
+            if(offsetFromField!= null) {
+                scheduledNode.addChildElement('recordField', SOAP_NS, null).addTextNode(offsetFromField.getText().split('\\.')[1]);
+            } else {
+                scheduledNode.addChildElement('recordField', SOAP_NS, null).addTextNode('LastModifiedDate');
+            }
+            scheduledNode.addChildElement('timeSource', SOAP_NS, null).addTextNode('RecordField');
+        }
+
+        return null;
+    }
+
+    public static void sortXMLChildren(Dom.XmlNode flowXML, Dom.XmlNode node, String nodeName) {
+        
+        List<Dom.XmlNode> childList = XmlUtils.getChildrenByName(flowXml, nodeName);
+        if(childList.size() > 1) {
+            node.getParent().removeChild(node);
+            childList = XmlUtils.getChildrenByName(flowXml, nodeName);
+            if(childList != null && childList.size() > 0) {
+                node = flowXML.insertBefore(node, childList[0]);
+            }
+        }      
+
+    }
+
     public static List<DescribeFieldResult> getFields(String selectedObject){
         List<DescribeFieldResult> reqFields = new List<DescribeFieldResult>();
         Map <String,Schema.SObjectType> gd = Schema.getGlobalDescribe();
@@ -410,6 +523,7 @@ public with sharing class ConvertWFRMetadata {
         public String convertedFlowMetadata;
 
     }
+
 
     public class WFRConvertException extends Exception{}
 }

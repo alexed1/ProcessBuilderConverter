@@ -32,8 +32,8 @@ public with sharing class ValidateWFRMetadata {
             
 
             //don't currently support time triggers
-            if (hasTimeTriggers(rulesEntity) == true)
-            ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + 'This converter can not currently convert WorkflowRules with Time Triggers  \n';
+            //if (hasTimeTriggers(rulesEntity) == true)
+            //ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + 'This converter can not currently convert WorkflowRules with Time Triggers  \n';
     
 
             //get and validate the corresponding action entities
