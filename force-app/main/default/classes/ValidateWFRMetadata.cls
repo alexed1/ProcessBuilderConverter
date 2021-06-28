@@ -52,14 +52,14 @@ public with sharing class ValidateWFRMetadata {
 
     }
 
-    public static Boolean hasTimeTriggers (Dom.XmlNode rulesEntity) {
-        Boolean hasTimeTriggers = false;
-        if(rulesEntity.getChildElement('workflowTimeTriggers', SOAP_NS) != null) {
-            return true;
-        }
+    // public static Boolean hasTimeTriggers (Dom.XmlNode rulesEntity) {
+    //     Boolean hasTimeTriggers = false;
+    //     if(rulesEntity.getChildElement('workflowTimeTriggers', SOAP_NS) != null) {
+    //         return true;
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 
     //some fieldUpdates use special types or formulas, and are not yet supported
     public static Boolean isValidFieldUpdate(String fieldUpdateName) {
@@ -116,8 +116,8 @@ public with sharing class ValidateWFRMetadata {
         String type = getActionType(actionEntity);
         String name = getActionName(actionEntity);
         switch on type {
-            when 'OutboundMessage', 'KnowledgePublish', 'Task', 'FlowAction' {
-                ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + ' \n The selected Workflow Rule contains one of the following unsupported actions: OutboundMessage, Task, KnowledgePublish, FlowAction. Currently the converter only works with rules that have Update Fields and/or Email Alerts. ';
+            when 'OutboundMessage', 'KnowledgePublish', 'FlowAction' {
+                ValidateWFRMetadata.validityProblemString = ValidateWFRMetadata.validityProblemString + ' \n The selected Workflow Rule contains one of the following unsupported actions: OutboundMessage, KnowledgePublish, FlowAction. Currently the converter only works with rules that have Update Fields and/or Email Alerts. ';
             }
             when 'FieldUpdate' {
                 if (isValidFieldUpdate(name) == true) {
