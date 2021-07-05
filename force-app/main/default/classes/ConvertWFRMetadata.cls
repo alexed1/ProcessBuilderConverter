@@ -200,6 +200,7 @@ public with sharing class ConvertWFRMetadata {
         }
     
         addConversionLog(flowXML);
+        addConversionSource(flowXML);
         ConvertFlowMetadata.enableAutoLayout(flowXML);
        
 
@@ -589,6 +590,16 @@ public with sharing class ConvertWFRMetadata {
             }
         }      
 
+    }
+
+    public static Dom.XmlNode addConversionSource(Dom.XmlNode flowXML){
+        Dom.XmlNode processMetadata = flowXML.addChildElement('processMetadataValues', SOAP_NS, null);
+            if(processMetadata != null){
+            processMetadata.addChildElement('name', SOAP_NS, null).addTextNode('ConversionSource');
+            Dom.XmlNode value = processMetadata.addChildElement('value', SOAP_NS, null);
+            value.addChildElement('stringValue', SOAP_NS, null).addTextNode('WorkflowRule');
+            }
+        return null;
     }
 
     public static List<DescribeFieldResult> getFields(String selectedObject){
