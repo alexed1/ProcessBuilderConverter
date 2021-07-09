@@ -200,6 +200,7 @@ public with sharing class ConvertWFRMetadata {
         }
     
         addConversionLog(flowXML);
+        addConversionSource(flowXML);
         ConvertFlowMetadata.enableAutoLayout(flowXML);
        
 
@@ -381,12 +382,22 @@ public with sharing class ConvertWFRMetadata {
         statusInput.addChildElement('value', SOAP_NS, null).addChildElement('stringValue', SOAP_NS, null).addTextNode(status.getText());
         String dateFormulaExpression = '';
         if(offsetFromField == null) {
-            dateFormulaExpression += '{! $System.OriginDateTime}';
+            dateFormulaExpression += '{! $Flow.CurrentDate}';
+        } else if(offsetFromField.getText().startsWith('User.')) {
+            dateFormulaExpression += '{! ' + offsetFromField.getText().replace('User', '$Record.LastModifiedBy') +  '}';
         } else {
-            dateFormulaExpression += '{! ' + offsetFromField.getText().replace(objectName, '$Record') +  '}';
+            if(offsetFromField.getText().startsWith(objectName + '.')) {
+                dateFormulaExpression += '{! ' + offsetFromField.getText().replace(objectName, '$Record') +  '}';
+            } else {
+                dateFormulaExpression += '{! $Record.' + offsetFromField.getText() +  '}';
+            }
         }
         if(dueDateOffset != null) {
-            dateFormulaExpression += ' + ' + dueDateOffset.getText();
+            if(dueDateOffset.getText().startsWith('-')) {
+                dateFormulaExpression += ' ' + dueDateOffset.getText();
+            } else {
+                dateFormulaExpression += ' + ' + dueDateOffset.getText();
+            }
         }
         duedateInput.addChildElement('value', SOAP_NS, null).addChildElement('elementReference', SOAP_NS, null).addTextNode(actionName + '_formula');
 
@@ -579,6 +590,16 @@ public with sharing class ConvertWFRMetadata {
             }
         }      
 
+    }
+
+    public static Dom.XmlNode addConversionSource(Dom.XmlNode flowXML){
+        Dom.XmlNode processMetadata = flowXML.addChildElement('processMetadataValues', SOAP_NS, null);
+            if(processMetadata != null){
+            processMetadata.addChildElement('name', SOAP_NS, null).addTextNode('ConversionSource');
+            Dom.XmlNode value = processMetadata.addChildElement('value', SOAP_NS, null);
+            value.addChildElement('stringValue', SOAP_NS, null).addTextNode('WorkflowRule');
+            }
+        return null;
     }
 
     public static List<DescribeFieldResult> getFields(String selectedObject){
