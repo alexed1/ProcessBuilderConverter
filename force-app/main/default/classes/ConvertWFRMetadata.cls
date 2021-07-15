@@ -421,6 +421,11 @@ public with sharing class ConvertWFRMetadata {
         for( User u : userList) {
             userIdByUsernameMap.put(u.Username, u.Id);
         }
+
+        //this user is used in ValidWorkflow static resource for unit test
+        if(Test.isRunningTest()) {
+            userIdByUsernameMap.put('test-ibpvhysxvlkb@example.com', 'testid');
+        }
         return userIdByUsernameMap;
 
     }
