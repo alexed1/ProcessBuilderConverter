@@ -323,6 +323,21 @@ public with sharing class ModifyFlowMetadata {
         //System.debug ('flowxml with start is: ' + flowXML);
         
         return flowXML;
+
+        
+    }
+
+    public static void sortXMLChildren(Dom.XmlNode flowXML, Dom.XmlNode node, String nodeName) {
+        
+        List<Dom.XmlNode> childList = XmlUtils.getChildrenByName(flowXml, nodeName);
+        if(childList.size() > 1) {
+            node.getParent().removeChild(node);
+            childList = XmlUtils.getChildrenByName(flowXml, nodeName);
+            if(childList != null && childList.size() > 0) {
+                node = flowXML.insertBefore(node, childList[0]);
+            }
+        }      
+
     }
 
     public class PBConvertException extends Exception{}

@@ -108,8 +108,8 @@ public with sharing class ConvertFlowMetadata {
             }
             waitElWr.add(newWaiwr);
         }
-        doc = removeAssigmentsElements(doc);
-        flowXML = doc.getRootElement();
+        
+        
         //removeAssigmentReference(flowXML);
         for(WaitElementsWrapper elementName:waitElWr){
             removeWaitsElements(flowXML);
@@ -123,6 +123,8 @@ public with sharing class ConvertFlowMetadata {
         flowXML = ModifyFlowMetadata.changeProcessType(flowXML, newProcessType);
         flowXML = ModifyFlowMetadata.setStatus(flowXML, 'Draft' );
         flowXML = ModifyFlowMetadata.addStartElement(flowXML, contextObjectType, triggerType, startElementReference, waitElWr);
+        doc = removeAssigmentsElements(doc);
+        flowXML = doc.getRootElement();
         ModifyFlowMetadata.setTriggerType(flowXML);
         ModifyFlowMetadata.removeExcessPMV(flowXML, 'ObjectType');
         ModifyFlowMetadata.removeExcessPMV(flowXML, 'ObjectVariable');
@@ -364,12 +366,13 @@ public with sharing class ConvertFlowMetadata {
             Dom.XmlNode parent = assignment.getParent();
             String assignmentName = assignment.getChildElement('name', SOAP_NS).getText();
             String referenceName = assignment.getChildElement('connector', SOAP_NS).getChildElement('targetReference', SOAP_NS).getText();
-            if(parent != null){
 
+            if(parent != null){
                 referenceMap.put(assignmentName, referenceName);
                 parent.removeChild(assignment);
             }
         }
+        System.debug('refMap ' + referenceMap);
 
         List<String> keySet = new List<String>(referenceMap.keySet());
         for(Integer i = 0; i < referenceMap.size(); i++) {
@@ -388,6 +391,7 @@ public with sharing class ConvertFlowMetadata {
                 xmlText = xmlText.replace(key, referenceMap.get(key));
             }
         }
+        System.debug('xmlText ' + xmlText);
 
         doc =new Dom.Document();
         doc.load(xmlText);
