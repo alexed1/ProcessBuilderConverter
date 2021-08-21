@@ -63,6 +63,15 @@ public with sharing class ValidateMetadata {
             }
             }
         }
+
+        List<Dom.XmlNode> actionCallList = XmlUtils.getChildrenByName(flowXml, 'actionCalls');
+
+        for(Dom.XmlNode actionCall : actionCallList) {
+            Dom.XmlNode actionType = actionCall.getChildElement('actionType', SOAP_NS);
+            if(actionType != null && actionType.getText() == 'flow') {
+                validityProblemString += 'The selected process builder process launches an autolaunched flow. Currently ConvertToFlow can’t convert this kind of process\n';
+            }
+        } 
         return validityProblemString;
     }
 
