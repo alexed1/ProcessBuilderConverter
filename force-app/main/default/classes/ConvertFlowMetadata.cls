@@ -123,6 +123,7 @@ public with sharing class ConvertFlowMetadata {
         flowXML = ModifyFlowMetadata.changeProcessType(flowXML, newProcessType);
         flowXML = ModifyFlowMetadata.setStatus(flowXML, 'Draft' );
         flowXML = ModifyFlowMetadata.addStartElement(flowXML, contextObjectType, triggerType, startElementReference, waitElWr);
+        ModifyFlowMetadata.setTriggerType(flowXML);
         ModifyFlowMetadata.removeExcessPMV(flowXML, 'ObjectType');
         ModifyFlowMetadata.removeExcessPMV(flowXML, 'ObjectVariable');
         ModifyFlowMetadata.removeExcessPMV(flowXML, 'OldObjectVariable');

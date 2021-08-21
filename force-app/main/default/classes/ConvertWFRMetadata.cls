@@ -86,7 +86,7 @@ public with sharing class ConvertWFRMetadata {
                 '<locationY>40</locationY>'+
                 '<object>'+  objectName + '</object>'+
                 //'<recordTriggerType>Create</recordTriggerType>'+
-                '<triggerType>RecordAfterSave</triggerType>'+
+                //'<triggerType>RecordAfterSave</triggerType>'+
             '</start>'+
             //'<status>Active</status>' +
         '</Flow>';
@@ -201,6 +201,7 @@ public with sharing class ConvertWFRMetadata {
     
         addConversionLog(flowXML);
         addConversionSource(flowXML);
+        ModifyFlowMetadata.setTriggerType(flowXML);
         ConvertFlowMetadata.enableAutoLayout(flowXML);
        
 
@@ -230,6 +231,7 @@ public with sharing class ConvertWFRMetadata {
 
         return null;
     }
+
     public static Dom.XmlNode addConversionLog(Dom.XmlNode flowXML){
         Dom.XmlNode processMetadata = flowXML.addChildElement('processMetadataValues', SOAP_NS, null);
             if(processMetadata != null){
@@ -241,6 +243,7 @@ public with sharing class ConvertWFRMetadata {
     }
     public static Dom.XmlNode convertFieldUpdateAction(Dom.XmlNode actionEntity, Dom.XmlNode flowXML, String objectName, String schedulePathName) {
         Dom.XmlNode  recordUpdate = flowXML.addChildElement('recordUpdates', SOAP_NS, null);
+        
         String actionName = actionEntity.getChildElement('fullName', SOAP_NS).getText();
         if(!String.isEmpty(schedulePathName)) {
             actionName = schedulePathName + '_' + actionName;
@@ -250,7 +253,6 @@ public with sharing class ConvertWFRMetadata {
         recordUpdate.addChildElement('name', SOAP_NS, null).addTextNode(actionName);
         recordUpdate.addChildElement('label', SOAP_NS, null).addTextNode(actionLabel);
         recordUpdate.addChildElement('object', SOAP_NS, null).addTextNode(objectName);
-        recordUpdate.addChildElement('filterLogic', SOAP_NS, null).addTextNode('and');
 
 
         Dom.XmlNode filter =  recordUpdate.addChildElement('filters', SOAP_NS, null);

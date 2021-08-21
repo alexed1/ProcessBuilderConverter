@@ -67,6 +67,69 @@ public with sharing class ModifyFlowMetadata {
     
     }
 
+    public static Dom.XmlNode setTriggerType(Dom.XmlNode flowXML){
+        Dom.XmlNode startElement = flowXML.getChildElement('start', SOAP_NS);
+        List<Dom.XmlNode> schedulePathList = XmlUtils.getChildrenByName(startElement, 'scheduledPaths');
+        String triggerType = 'RecordBeforeSave';
+        if(schedulePathList.size() > 0) {
+            triggerType = 'RecordAfterSave';
+        }
+
+        List<Dom.XmlNode> actionList = XmlUtils.getChildrenByName(flowXml, 'actionCalls');
+
+        if(actionList.size() > 0 ) {
+            triggerType = 'RecordAfterSave';
+        }
+
+        List<Dom.XmlNode> recordLookupsList = XmlUtils.getChildrenByName(flowXml, 'recordLookups');
+
+        if(recordLookupsList.size() > 0 ) {
+            triggerType = 'RecordAfterSave';
+        }
+
+        List<Dom.XmlNode> recordCreatesList = XmlUtils.getChildrenByName(flowXml, 'recordCreates');
+
+        if(recordCreatesList.size() > 0 ) {
+            triggerType = 'RecordAfterSave';
+        }
+
+        List<Dom.XmlNode> recordDeletesList = XmlUtils.getChildrenByName(flowXml, 'recordDeletes');
+
+        if(recordDeletesList.size() > 0 ) {
+            triggerType = 'RecordAfterSave';
+        }
+
+        List<Dom.XmlNode> recordUpdatesList = XmlUtils.getChildrenByName(flowXml, 'recordUpdates');
+        for(Dom.XmlNode recordUpdates : recordUpdatesList) {
+            List<dom.XmlNode> filters = XmlUtils.getChildrenByName(recordUpdates, 'filters');
+
+            if(filters.size() > 1 || filters.size() == 0) {
+                triggerType = 'RecordAfterSave';
+            } else if(filters.size() == 1) {
+                String field = filters[0].getChildElement('field', SOAP_NS).getText();
+                String operator = filters[0].getChildElement('operator', SOAP_NS).getText();
+                Dom.XmlNode value =  filters[0].getChildElement('value', SOAP_NS);
+                Dom.XmlNode elementReference;
+                if(value != null) {
+                    elementReference =  value.getChildElement('elementReference', SOAP_NS);
+                }
+
+                if(field != 'Id' || operator != 'EqualTo' || value == null || elementReference == null || (elementReference.getText() != 'myVariable_current.Id' && elementReference.getText() != '$Record.Id')) {
+                    triggerType = 'RecordAfterSave';
+                } else {
+                    recordUpdates.removeChild(filters[0]);
+                    recordUpdates.addChildElement('inputReference', SOAP_NS, null).addTextNode('$Record');
+                    Dom.XmlNode objectXML  =  recordUpdates.getChildElement('object', SOAP_NS);
+                    recordUpdates.removeChild(objectXML);
+                }
+
+            } 
+        }
+        startElement.addChildElement('triggerType', SOAP_NS, null).addTextNode(triggerType);
+        
+        return null;
+    }
+
     public static void repositionElements(Dom.Document doc) {
         //get Decision elements that have order values into a group
 
@@ -253,7 +316,7 @@ public with sharing class ModifyFlowMetadata {
             scheduledNode.addChildElement('timeSource', SOAP_NS, null).addTextNode('RecordField');
 
         }
-        startNode.addChildElement('triggerType', SOAP_NS, null).addTextNode('RecordAfterSave');
+        //startNode.addChildElement('triggerType', SOAP_NS, null).addTextNode('RecordAfterSave');
         
 
 
