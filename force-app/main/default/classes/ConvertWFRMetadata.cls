@@ -663,10 +663,16 @@ public with sharing class ConvertWFRMetadata {
             rules.addChildElement('conditionLogic', SOAP_NS, null).addTextNode('and');
         }
         Dom.XmlNode formula = wfrRule.getChildElement('formula', SOAP_NS);
+        String value = formula.getText();
         Dom.XmlNode formulaNode = flowXML.addChildElement('formulas', SOAP_NS, null);
         formulaNode.addChildElement('name', SOAP_NS, null).addTextNode( 'startelement_formula');
         formulaNode.addChildElement('dataType', SOAP_NS, null).addTextNode('Boolean');
-        formulaNode.addChildElement('expression', SOAP_NS, null).addTextNode(formula.getText());
+        for(DescribeFieldResult field : ConvertWFRMetadata.sObjectFieldList) {
+            if(value.contains(field.getName())) {
+                value = value.replaceAll(''+ field.getName() +'(?!")', '{! \\$Record.' + field.getName() + '}');
+            }
+        }
+        formulaNode.addChildElement('expression', SOAP_NS, null).addTextNode(value);
         sortXMLChildren(flowXML, formulaNode, 'formulas');
 
         Dom.XmlNode conditions = rules.addChildElement('conditions', SOAP_NS, null);
