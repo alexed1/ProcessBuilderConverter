@@ -139,6 +139,31 @@
         </rules>
     </decisions>
     <decisions>
+        <name>Inspect_Deploying_Result</name>
+        <label>Inspect Deploying Result</label>
+        <locationX>588</locationX>
+        <locationY>124</locationY>
+        <defaultConnector>
+            <targetReference>finalMessage</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Is_Successfully</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>deployFlow.error</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>ChooseAction</targetReference>
+            </connector>
+            <label>Is Successfully</label>
+        </rules>
+    </decisions>
+    <decisions>
         <name>Which_Parser</name>
         <label>Which Parser?</label>
         <locationX>84</locationX>
@@ -258,8 +283,8 @@
     <screens>
         <name>finalMessage</name>
         <label>finalMessage</label>
-        <locationX>381</locationX>
-        <locationY>132</locationY>
+        <locationX>481</locationX>
+        <locationY>216</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -277,13 +302,13 @@
     <screens>
         <name>Output_Screen</name>
         <label>Output Screen</label>
-        <locationX>642</locationX>
-        <locationY>110</locationY>
+        <locationX>691</locationX>
+        <locationY>99</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
         <connector>
-            <targetReference>finalMessage</targetReference>
+            <targetReference>Inspect_Deploying_Result</targetReference>
         </connector>
         <fields>
             <name>dispSuccess</name>
