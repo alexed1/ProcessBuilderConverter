@@ -108,8 +108,8 @@ public with sharing class ConvertFlowMetadata {
             }
             waitElWr.add(newWaiwr);
         }
-        doc = removeAssigmentsElements(doc);
-        flowXML = doc.getRootElement();
+        
+        
         //removeAssigmentReference(flowXML);
         for(WaitElementsWrapper elementName:waitElWr){
             removeWaitsElements(flowXML);
@@ -120,9 +120,12 @@ public with sharing class ConvertFlowMetadata {
         enableAutoLayout(flowXML);
         addConversionLog(flowXML);
         addConversionSource(flowXML);
+        ModifyFlowMetadata.convertSubflow(flowXML);
         flowXML = ModifyFlowMetadata.changeProcessType(flowXML, newProcessType);
         flowXML = ModifyFlowMetadata.setStatus(flowXML, 'Draft' );
         flowXML = ModifyFlowMetadata.addStartElement(flowXML, contextObjectType, triggerType, startElementReference, waitElWr);
+        doc = removeAssigmentsElements(doc);
+        flowXML = doc.getRootElement();
         ModifyFlowMetadata.setTriggerType(flowXML);
         ModifyFlowMetadata.removeExcessPMV(flowXML, 'ObjectType');
         ModifyFlowMetadata.removeExcessPMV(flowXML, 'ObjectVariable');
@@ -363,13 +366,18 @@ public with sharing class ConvertFlowMetadata {
         for(Dom.XmlNode assignment : assignmentsNode) {
             Dom.XmlNode parent = assignment.getParent();
             String assignmentName = assignment.getChildElement('name', SOAP_NS).getText();
-            String referenceName = assignment.getChildElement('connector', SOAP_NS).getChildElement('targetReference', SOAP_NS).getText();
-            if(parent != null){
+            Dom.XmlNode referenceNameXML = assignment.getChildElement('connector', SOAP_NS);
+            String referenceName = '';
+            if(referenceNameXML != null) {
+                referenceName = referenceNameXML.getChildElement('targetReference', SOAP_NS).getText();
+            }
 
+            if(parent != null){
                 referenceMap.put(assignmentName, referenceName);
                 parent.removeChild(assignment);
             }
         }
+        System.debug('refMap ' + referenceMap);
 
         List<String> keySet = new List<String>(referenceMap.keySet());
         for(Integer i = 0; i < referenceMap.size(); i++) {
@@ -388,55 +396,56 @@ public with sharing class ConvertFlowMetadata {
                 xmlText = xmlText.replace(key, referenceMap.get(key));
             }
         }
+        System.debug('xmlText ' + xmlText);
 
         doc =new Dom.Document();
         doc.load(xmlText);
         return doc;
     }
 
-    public static Dom.XmlNode removeAssigmentReference(Dom.XmlNode flowXML){
-        List<Dom.XmlNode> listElements = flowXML.getChildren();
-        for(Dom.XmlNode assigmentRef:listElements){
-            if(assigmentRef.getName() == 'decisions'){
-                Dom.XmlNode assRefToDec = assigmentRef.getChildElement('defaultConnector', SOAP_NS);
-                if(assRefToDec != null){
-                    String targRefName = assRefToDec.getChildElement('targetReference', SOAP_NS).getText();
-                    if(targRefName.contains('Assignment')){
-                        assRefToDec.getParent().removeChild(assRefToDec);
-                    }
-                }
-            }
-            if(assigmentRef.getName() == 'actionCalls'){
-                Dom.XmlNode actionCallsRef = assigmentRef.getChildElement('connector', SOAP_NS);
-                if(actionCallsRef != null){
-                    String targRefName = actionCallsRef.getChildElement('targetReference', SOAP_NS).getText();
-                    if(targRefName.contains('Assignment')){
-                        actionCallsRef.getParent().removeChild(actionCallsRef);
-                    }
-                }
-            }
-            if(assigmentRef.getName() == 'recordUpdates'){
-                Dom.XmlNode refForUpdateRec = assigmentRef.getChildElement('connector', SOAP_NS);
-                if(refForUpdateRec != null){
-                    String targRefName = refForUpdateRec.getChildElement('targetReference', SOAP_NS).getText();
-                    if(targRefName.contains('Assignment')){
-                        refForUpdateRec.getParent().removeChild(refForUpdateRec);
-                    }
-                }
-            }
-            if(assigmentRef.getName() == 'recordCreates'){
-                Dom.XmlNode refToRecordCreate = assigmentRef.getChildElement('connector', SOAP_NS);
-                if(refToRecordCreate != null){
-                    String targRefName = refToRecordCreate.getChildElement('targetReference', SOAP_NS).getText();
-                    if(targRefName.contains('Assignment')){
-                        refToRecordCreate.getParent().removeChild(refToRecordCreate);
-                    }
-                }
-            }
+    // public static Dom.XmlNode removeAssigmentReference(Dom.XmlNode flowXML){
+    //     List<Dom.XmlNode> listElements = flowXML.getChildren();
+    //     for(Dom.XmlNode assigmentRef:listElements){
+    //         if(assigmentRef.getName() == 'decisions'){
+    //             Dom.XmlNode assRefToDec = assigmentRef.getChildElement('defaultConnector', SOAP_NS);
+    //             if(assRefToDec != null){
+    //                 String targRefName = assRefToDec.getChildElement('targetReference', SOAP_NS).getText();
+    //                 if(targRefName.contains('Assignment')){
+    //                     assRefToDec.getParent().removeChild(assRefToDec);
+    //                 }
+    //             }
+    //         }
+    //         if(assigmentRef.getName() == 'actionCalls'){
+    //             Dom.XmlNode actionCallsRef = assigmentRef.getChildElement('connector', SOAP_NS);
+    //             if(actionCallsRef != null){
+    //                 String targRefName = actionCallsRef.getChildElement('targetReference', SOAP_NS).getText();
+    //                 if(targRefName.contains('Assignment')){
+    //                     actionCallsRef.getParent().removeChild(actionCallsRef);
+    //                 }
+    //             }
+    //         }
+    //         if(assigmentRef.getName() == 'recordUpdates'){
+    //             Dom.XmlNode refForUpdateRec = assigmentRef.getChildElement('connector', SOAP_NS);
+    //             if(refForUpdateRec != null){
+    //                 String targRefName = refForUpdateRec.getChildElement('targetReference', SOAP_NS).getText();
+    //                 if(targRefName.contains('Assignment')){
+    //                     refForUpdateRec.getParent().removeChild(refForUpdateRec);
+    //                 }
+    //             }
+    //         }
+    //         if(assigmentRef.getName() == 'recordCreates'){
+    //             Dom.XmlNode refToRecordCreate = assigmentRef.getChildElement('connector', SOAP_NS);
+    //             if(refToRecordCreate != null){
+    //                 String targRefName = refToRecordCreate.getChildElement('targetReference', SOAP_NS).getText();
+    //                 if(targRefName.contains('Assignment')){
+    //                     refToRecordCreate.getParent().removeChild(refToRecordCreate);
+    //                 }
+    //             }
+    //         }
 
-        }
-        return null;
-    }
+    //     }
+    //     return null;
+    // }
 
     public static Dom.XmlNode addConversionLog(Dom.XmlNode flowXML){
         Dom.XmlNode processMetadata = flowXML.addChildElement('processMetadataValues', SOAP_NS, null);

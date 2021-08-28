@@ -235,8 +235,8 @@ public with sharing class ModifyFlowMetadata {
         System.debug('changing the position of this node: ' + XmlUtils.getInternalName(curNode) + ' to xval ' + newXVal + ' and to yval ' + newYVal);
         Dom.XmlNode curXPos = curNode.getChildElement('locationX', SOAP_NS);
         Dom.XmlNode curYPos = curNode.getChildElement('locationY', SOAP_NS);
-        if (curXPos == null || curYPos == null)
-            throw new PBConvertException('tried to set the x or y position on an xml node that does not support position values');
+         if (curXPos == null || curYPos == null)
+             throw new PBConvertException('tried to set the x or y position on an xml node that does not support position values');
         deleteSelf(curXPos);
         curNode.addChildElement('locationX', SOAP_NS, null).addTextNode(newXVal);
         deleteSelf(curYPos);
@@ -323,6 +323,66 @@ public with sharing class ModifyFlowMetadata {
         //System.debug ('flowxml with start is: ' + flowXML);
         
         return flowXML;
+
+        
+    }
+
+    public static void sortXMLChildren(Dom.XmlNode flowXML, Dom.XmlNode node, String nodeName) {
+        
+        List<Dom.XmlNode> childList = XmlUtils.getChildrenByName(flowXml, nodeName);
+        if(childList.size() > 1) {
+            node.getParent().removeChild(node);
+            childList = XmlUtils.getChildrenByName(flowXml, nodeName);
+            if(childList != null && childList.size() > 0) {
+                node = flowXML.insertBefore(node, childList[0]);
+            }
+        }      
+
+    }
+
+    public static void convertSubflow(Dom.XmlNode flowXML) {
+        List<Dom.XmlNode> actionCallList = XmlUtils.getChildrenByName(flowXML, 'actionCalls');
+
+        for(Dom.XmlNode actionCall : actionCallList) {
+            Dom.XmlNode actionType = actionCall.getChildElement('actionType', SOAP_NS);
+            if(actionType != null && actionType.getText() == 'flow') {
+                String name = actionCall.getChildElement('name', SOAP_NS).getText();
+                string label = actionCall.getChildElement('label', SOAP_NS).getText();
+                String flowName = actionCall.getChildElement('actionName', SOAP_NS).getText();
+                String targetReference = '';
+                Dom.XmlNode connector = actionCall.getChildElement('connector', SOAP_NS);
+                if(connector != null) {
+                    targetReference = connector.getChildElement('targetReference', SOAP_NS).getText();
+                }
+
+                Dom.XmlNode subflow = flowXML.addChildElement('subflows', SOAP_NS, null);
+                subflow.addChildElement('name', SOAP_NS, null).addTextNode(name);
+                subflow.addChildElement('label', SOAP_NS, null).addTextNode(label);
+                subflow.addChildElement('flowName', SOAP_NS, null).addTextNode(flowName);
+                subflow.addChildElement('storeOutputAutomatically', SOAP_NS, null).addTextNode('true');
+                subflow.addChildElement('locationX', SOAP_NS, null).addTextNode('100');
+                subflow.addChildElement('locationY', SOAP_NS, null).addTextNode('300');
+                if(String.isNotEmpty(targetReference)) {
+                    subflow.addChildElement('connector', SOAP_NS, null).addChildElement('targetReference', SOAP_NS, null).addTextNode(targetReference);
+                }
+
+                List<Dom.XmlNode> inputList = XmlUtils.getChildrenByName(actionCall, 'inputParameters');
+                for(Dom.XmlNode input : inputList) {
+                    String inputName = input.getChildElement('name', SOAP_NS).getText();
+                    Dom.XmlNode inputAssignment = subflow.addChildElement('inputAssignments', SOAP_NS, null);
+                    inputAssignment.addChildElement('name', SOAP_NS, null).addTextNode(inputName);
+                    Dom.XmlNode value = input.getChildElement('value', SOAP_NS);
+                    List<Dom.XmlNode> typesList = value.getChildElements();
+                    for(Dom.XmlNode type : typesList) {
+                        System.debug('types ' + type.getName() );
+                        inputAssignment.addChildElement('value', SOAP_NS, null).addChildElement(type.getName(), SOAP_NS, null).addTextNode(type.getText());
+                    }
+
+                }
+
+                actionCall.getParent().removeChild(actionCall);
+            }
+        } 
     }
 
     public class PBConvertException extends Exception{}

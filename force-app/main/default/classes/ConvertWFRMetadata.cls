@@ -119,11 +119,29 @@ public with sharing class ConvertWFRMetadata {
             flowTriggerType
         );
         addConditionToStartElement(startElement, wfrRule, objectName, doesRequireRecordChangedToMeetCriteria);
+
+        Dom.XmlNode decision;
+
+        Dom.XmlNode formula = wfrRule.getChildElement('formula', SOAP_NS);
+         if(formula != null) {
+             decision = createDecision(flowXML, wfrRule, objectName, doesRequireRecordChangedToMeetCriteria);
+        //     Dom.XmlNode formulaNode = flowXML.addChildElement('formulas', SOAP_NS, null);
+        //     formulaNode.addChildElement('name', SOAP_NS, null).addTextNode( + 'startelement_formula');
+        //     formulaNode.addChildElement('dataType', SOAP_NS, null).addTextNode('Boolean');
+        //     formulaNode.addChildElement('expression', SOAP_NS, null).addTextNode(formula.getText());
+        //     sortXMLChildren(flowXML, formulaNode, 'formulas');
+
+        }
+
+        
         createSchedulePaths(flowXML, wfrRule, wfrXML, objectName);
         
 
         List<Dom.XmlNode> actionList = new List<Dom.XmlNode>();
         List<Dom.XmlNode> ruleActionList = ValidateWFRMetadata.getRuleActions(wfrRule);
+        if(decision != null) {
+            actionList.add(decision);
+        }
         Integer alertCount = 1;
         for(Dom.XmlNode action : ruleActionList) {
             String actionType = ValidateWFRMetadata.getActionType(action);
@@ -189,12 +207,27 @@ public with sharing class ConvertWFRMetadata {
             positionY += 300;
             if(actionList.size() > 1) {
                 for(Integer i = 0; i < actionList.size() - 1; i++) {
-                    actionList[i].addChildElement('connector', SOAP_NS, null)
-                        .addChildElement('targetReference', SOAP_NS, null)
-                            .addTextNode(actionList[i+1].getChildElement('name', SOAP_NS).getText());
+                    if(actionList[i].getName() == 'decisions') {
+                        Dom.XmlNode rules = actionList[i].getChildElement('rules', SOAP_NS);
+                        if(rules != null) {
+                            rules.addChildElement('connector', SOAP_NS, null)
+                                .addChildElement('targetReference', SOAP_NS, null)
+                                .addTextNode(actionList[i+1].getChildElement('name', SOAP_NS).getText());
+                        } else {
+                            actionList[i].addChildElement('defaultConnector', SOAP_NS, null)
+                            .addChildElement('targetReference', SOAP_NS, null)
+                                .addTextNode(actionList[i+1].getChildElement('name', SOAP_NS).getText());
+                        }
+                    } else {
+                        actionList[i].addChildElement('connector', SOAP_NS, null)
+                            .addChildElement('targetReference', SOAP_NS, null)
+                                .addTextNode(actionList[i+1].getChildElement('name', SOAP_NS).getText());
+                        
+                    }
                     actionList[i+1].addChildElement('locationX', SOAP_NS, null).addTextNode(String.valueOf(150));
                     actionList[i+1].addChildElement('locationY', SOAP_NS, null).addTextNode(String.valueOf(positionY));
                     positionY += 100;
+                    
                 }
             }
         }
@@ -216,7 +249,7 @@ public with sharing class ConvertWFRMetadata {
 
     public static void deployChangedMetadata(String classText, String className, String testLevel, String objectType) {
 
-        DeployMetadata.deploy(classText, className, testLevel, objectType);
+        //DeployMetadata.deploy(classText, className, testLevel, objectType);
 
     }
     public static Dom.XmlNode getAction(Dom.XmlNode wfrXML,String actionName) {
@@ -451,9 +484,9 @@ public with sharing class ConvertWFRMetadata {
     public static Dom.XmlNode addConditionToStartElement(Dom.XmlNode startElement, Dom.XmlNode wfrRule, String objectName, Boolean doesRequireRecordChangedToMeetCriteria) {
         
 
-        if(doesRequireRecordChangedToMeetCriteria) {
-            startElement.addChildElement('doesRequireRecordChangedToMeetCriteria', SOAP_NS, null).addTextNode('true');
-        }
+        // if(doesRequireRecordChangedToMeetCriteria) {
+        //     startElement.addChildElement('doesRequireRecordChangedToMeetCriteria', SOAP_NS, null).addTextNode('true');
+        // }
 
         Dom.XmlNode booleanFilter = wfrRule.getChildElement('booleanFilter', SOAP_NS);
         if(booleanFilter != null) {
@@ -461,6 +494,17 @@ public with sharing class ConvertWFRMetadata {
         } else {
             startElement.addChildElement('filterLogic', SOAP_NS, null).addTextNode('and');
         }
+
+        Dom.XmlNode formula = wfrRule.getChildElement('formula', SOAP_NS);
+        // if(formula != null) {
+        //     Dom.XmlNode formulaNode = flowXML.addChildElement('formulas', SOAP_NS, null);
+        //     formulaNode.addChildElement('name', SOAP_NS, null).addTextNode( + 'startelement_formula');
+        //     formulaNode.addChildElement('dataType', SOAP_NS, null).addTextNode('Boolean');
+        //     formulaNode.addChildElement('expression', SOAP_NS, null).addTextNode(formula.getText());
+        //     sortXMLChildren(flowXML, formulaNode, 'formulas');
+
+        // }
+
         for(Dom.XmlNode criteriaItem : wfrRule.getChildren()) {
             if(criteriaItem.getName() == 'criteriaItems') {
                 String field = criteriaItem.getChildElement('field', SOAP_NS).getText();
@@ -597,6 +641,48 @@ public with sharing class ConvertWFRMetadata {
             }
         }      
 
+    }
+
+    public static Dom.XmlNode createDecision(Dom.XmlNode flowXML, Dom.XmlNode wfrRule, String objectName, Boolean doesRequireRecordChangedToMeetCriteria) {
+        Dom.XmlNode decision = flowXML.addChildElement('decisions', SOAP_NS, null);
+        decision.addChildElement('name', SOAP_NS, null).addTextNode('MyDecision');
+        decision.addChildElement('label', SOAP_NS, null).addTextNode('MyDecision');
+
+        decision.addChildElement('defaultConnectorLabel', SOAP_NS, null).addTextNode('default');
+        Dom.XmlNode rules = decision.addChildElement('rules', SOAP_NS, null);
+        rules.addChildElement('name', SOAP_NS, null).addTextNode('rules_1');
+        rules.addChildElement('label', SOAP_NS, null).addTextNode('rules_1');
+        if(doesRequireRecordChangedToMeetCriteria) {
+            rules.addChildElement('doesRequireRecordChangedToMeetCriteria', SOAP_NS, null).addTextNode('true');
+        }
+        //<booleanFilter>1 AND 2 AND 3 AND 4 AND 5 AND 6 AND 7 AND 8 AND 9</booleanFilter>
+        Dom.XmlNode booleanFilter = wfrRule.getChildElement('booleanFilter', SOAP_NS);
+        if(booleanFilter != null) {
+            rules.addChildElement('conditionLogic', SOAP_NS, null).addTextNode(booleanFilter.getText());
+        } else {
+            rules.addChildElement('conditionLogic', SOAP_NS, null).addTextNode('and');
+        }
+        Dom.XmlNode formula = wfrRule.getChildElement('formula', SOAP_NS);
+        String value = formula.getText();
+        Dom.XmlNode formulaNode = flowXML.addChildElement('formulas', SOAP_NS, null);
+        formulaNode.addChildElement('name', SOAP_NS, null).addTextNode( 'startelement_formula');
+        formulaNode.addChildElement('dataType', SOAP_NS, null).addTextNode('Boolean');
+        for(DescribeFieldResult field : ConvertWFRMetadata.sObjectFieldList) {
+            if(value.contains(field.getName())) {
+                value = value.replaceAll(''+ field.getName() +'(?!")', '{! \\$Record.' + field.getName() + '}');
+            }
+        }
+        formulaNode.addChildElement('expression', SOAP_NS, null).addTextNode(value);
+        sortXMLChildren(flowXML, formulaNode, 'formulas');
+
+        Dom.XmlNode conditions = rules.addChildElement('conditions', SOAP_NS, null);
+
+        conditions.addChildElement('operator', SOAP_NS, null).addTextNode('EqualTo');
+                
+        conditions.addChildElement('leftValueReference', SOAP_NS, null).addTextNode('startelement_formula');
+
+        conditions.addChildElement('rightValue', SOAP_NS, null).addChildElement('booleanValue', SOAP_NS, null).addTextNode('true');
+        return decision;
     }
 
     public static Dom.XmlNode addConversionSource(Dom.XmlNode flowXML){
