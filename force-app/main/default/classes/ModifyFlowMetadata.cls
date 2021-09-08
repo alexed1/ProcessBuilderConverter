@@ -67,7 +67,7 @@ public with sharing class ModifyFlowMetadata {
     
     }
 
-    public static Dom.XmlNode setTriggerType(Dom.XmlNode flowXML){
+    public static Dom.XmlNode setTriggerType(Dom.XmlNode flowXML, Boolean isWorkflow){
         Dom.XmlNode startElement = flowXML.getChildElement('start', SOAP_NS);
         List<Dom.XmlNode> schedulePathList = XmlUtils.getChildrenByName(startElement, 'scheduledPaths');
         String triggerType = 'RecordBeforeSave';
@@ -99,6 +99,12 @@ public with sharing class ModifyFlowMetadata {
             triggerType = 'RecordAfterSave';
         }
 
+        List<Dom.XmlNode> subflowsList = XmlUtils.getChildrenByName(flowXml, 'subflows');
+
+        if(subflowsList.size() > 0 ) {
+            triggerType = 'RecordAfterSave';
+        }
+
         List<Dom.XmlNode> recordUpdatesList = XmlUtils.getChildrenByName(flowXml, 'recordUpdates');
         for(Dom.XmlNode recordUpdates : recordUpdatesList) {
             List<dom.XmlNode> filters = XmlUtils.getChildrenByName(recordUpdates, 'filters');
@@ -125,6 +131,7 @@ public with sharing class ModifyFlowMetadata {
 
             } 
         }
+        
         startElement.addChildElement('triggerType', SOAP_NS, null).addTextNode(triggerType);
         
         return null;
