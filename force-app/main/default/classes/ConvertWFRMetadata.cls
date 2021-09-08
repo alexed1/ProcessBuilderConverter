@@ -234,7 +234,7 @@ public with sharing class ConvertWFRMetadata {
     
         addConversionLog(flowXML);
         addConversionSource(flowXML);
-        ModifyFlowMetadata.setTriggerType(flowXML);
+        ModifyFlowMetadata.setTriggerType(flowXML, true);
         ConvertFlowMetadata.enableAutoLayout(flowXML);
        
 
