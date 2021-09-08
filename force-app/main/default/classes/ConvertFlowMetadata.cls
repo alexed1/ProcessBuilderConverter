@@ -123,8 +123,8 @@ public with sharing class ConvertFlowMetadata {
         ModifyFlowMetadata.convertSubflow(flowXML);
         flowXML = ModifyFlowMetadata.changeProcessType(flowXML, newProcessType);
         flowXML = ModifyFlowMetadata.setStatus(flowXML, 'Draft' );
-        flowXML = ModifyFlowMetadata.addStartElement(flowXML, contextObjectType, triggerType, startElementReference, waitElWr);
-        doc = removeAssigmentsElements(doc);
+        flowXML = ModifyFlowMetadata.addStartElement(flowXML, contextObjectType, triggerType, startElementReference, waitElWr); 
+        doc = removeAssigmentsElements(doc); 
         flowXML = doc.getRootElement();
         ModifyFlowMetadata.setTriggerType(flowXML);
         ModifyFlowMetadata.removeExcessPMV(flowXML, 'ObjectType');
@@ -132,7 +132,7 @@ public with sharing class ConvertFlowMetadata {
         ModifyFlowMetadata.removeExcessPMV(flowXML, 'OldObjectVariable');
         ModifyFlowMetadata.removeExcessPMV(flowXML, 'RecursiveCountVariable');
         ModifyFlowMetadata.removeExcessPMV(flowXML, 'TriggerType');
-        doc = ModifyFlowMetadata.changeContextReference(doc);  
+        doc = ModifyFlowMetadata.changeContextReference(doc); 
         doc = ModifyFlowMetadata.fixupRelatedReferences(doc);
         ModifyFlowMetadata.repositionElements(doc);
         doc = removeNoCriteriaDecisons(doc);
@@ -256,7 +256,7 @@ public with sharing class ConvertFlowMetadata {
                     Dom.XmlNode checkCond = conditions.getChildElement('rules', SOAP_NS);
                     Dom.XmlNode condit = checkCond.getChildElement('conditions', SOAP_NS);
                     if(condit != null){
-                    condit.getParent().removeChild(condit);
+                        condit.getParent().removeChild(condit);
                     }
                     for(Dom.XmlNode newEl:conditionElements.values()){
                         if(newEl.getChildElement('name', SOAP_NS).getText().contains(nameForCheckCond)){
@@ -391,7 +391,9 @@ public with sharing class ConvertFlowMetadata {
         for(String key : referenceMap.keySet()) {
             System.debug('decisions - ' + key + ' ' + referenceMap.get(key));
             if(String.isEmpty(referenceMap.get(key))) {
-                xmlText = xmlText.replace('<connector><targetReference>' + key + '</targetReference></connector>', referenceMap.get(key));
+                xmlText = xmlText.replaceAll('\n', '');
+                xmlText = xmlText.replaceAll('<connector>(\\s*<targetReference>' + key + '</targetReference>\\s*)</connector>', referenceMap.get(key));
+                xmlText = xmlText.replaceAll('<defaultConnector>(\\s*<targetReference>' + key + '</targetReference>\\s*)</defaultConnector>', referenceMap.get(key));
             } else {
                 xmlText = xmlText.replace(key, referenceMap.get(key));
             }
@@ -515,8 +517,8 @@ public with sharing class ConvertFlowMetadata {
             System.debug('decisions - ' + key + ' ' + referenceMap.get(key));
             if(String.isEmpty(referenceMap.get(key))) {
                 xmlText = xmlText.replaceAll('\n', '');
-                xmlText = xmlText.replace('<connector><targetReference>' + key + '</targetReference></connector>', referenceMap.get(key));
-                xmlText = xmlText.replaceAll('<defaultConnector>(.*' + key + '.*)</defaultConnector>', referenceMap.get(key));
+                xmlText = xmlText.replaceAll('<connector>(\\s*<targetReference>' + key + '</targetReference>\\s*)</connector>', referenceMap.get(key));
+                xmlText = xmlText.replaceAll('<defaultConnector>(\\s*<targetReference>' + key + '</targetReference>\\s*)</defaultConnector>', referenceMap.get(key));
                 
             } else {
                 xmlText = xmlText.replace(key, referenceMap.get(key));
@@ -543,14 +545,13 @@ public with sharing class ConvertFlowMetadata {
             String decisionName = decision.getChildElement('name', SOAP_NS).getText();
             if(ruleList.size() == 1) {
                 Dom.XmlNode connector = ruleList[0].getChildElement('connector', SOAP_NS);
-                if(connector == null) {
+                if(connector == null || connector.getChildElement('targetReference', SOAP_NS).getText() == referenceName) {
                     referenceMap.put(decisionName, referenceName);
                     decisionToDeleteList.add(decision);
                 }
     
             }
         }        
-        
         for(Dom.XmlNode decision : decisionToDeleteList) {
             decision.getParent().removeChild(decision);
         }
@@ -563,11 +564,10 @@ public with sharing class ConvertFlowMetadata {
         }
         String xmlText = doc.toXmlString();
         for(String key : referenceMap.keySet()) {
-            System.debug('decisions - ' + key + ' ' + referenceMap.get(key));
             if(String.isEmpty(referenceMap.get(key))) {
                 xmlText = xmlText.replaceAll('\n', '');
-                xmlText = xmlText.replace('<connector><targetReference>' + key + '</targetReference></connector>', referenceMap.get(key));
-                xmlText = xmlText.replaceAll('<defaultConnector>(.*' + key + '.*)</defaultConnector>', referenceMap.get(key));
+                xmlText = xmlText.replaceAll('<connector>(\\s*<targetReference>' + key + '</targetReference>\\s*)</connector>', referenceMap.get(key));
+                xmlText = xmlText.replaceAll('<defaultConnector>(\\s*<targetReference>' + key + '</targetReference>\\s*)</defaultConnector>', referenceMap.get(key));
             } else {
                 xmlText = xmlText.replace(key, referenceMap.get(key));
             }
