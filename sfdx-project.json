@@ -8,10 +8,10 @@
             "versionNumber": "0.1.0.NEXT",
             "dependencies": [
                 {
-                    "package": "FlowActionsBasePack@2.20.0-0"
+                    "package": "FlowActionsBasePack@2.32.0-0"
                 },
                 {
-                    "package": "FlowScreenComponentsBasePack@2.3.5-0"
+                    "package": "FlowScreenComponentsBasePack@2.5.6-0"
                 }
             ]
         }
@@ -20,15 +20,15 @@
     "sfdcLoginUrl": "https://login.salesforce.com",
     "sourceApiVersion": "51.0",
     "packageAliases": {
-        "pbconvert": "0HoB0000000Cb2yKAC",
+        "pbconvert": "0Ho5G000000CaiISAS",
         "pbconvert@1.0.0-0": "04tB0000000P0GVIA0",
         "pbconvert@1.0.1-0": "04tB0000000P2ysIAC",
         "FlowActionsBasePack@2.12.0-0": "04t4W000002vyNZQAY",
         "FlowActionsBasePack@2.18.0-0": "04t4W000003088GQAQ",
-        "FlowActionsBasePack@2.20.0-0": "04t4W00000308ACQAY",
+        "FlowActionsBasePack@2.32.0-0": "04t4W0000034KebQAE",
         "FlowScreenComponentsBasePack@2.1.7-0": "04t5G0000047xDpQAI",
         "FlowScreenComponentsBasePack@2.3.5-0": "04t5G0000047xJOQAY",
-        "FlowScreenComponentsBasePack@2.3.4-0": "04t5G0000047xIuQAI"
+        "FlowScreenComponentsBasePack@2.5.6-0": "04t5G000003rUc3QAE",
+        "pbconvert@1.2.0-0": "04t5G000003rUc8QAE"
     }
 }
-
